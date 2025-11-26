@@ -1,9 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
 import { ArticleCard } from "./ArticleCard";
 
 export interface ArticleModalProps {
 	content: string;
+	title?: string;
+	author?: string;
+	timestamp?: number;
 	isOpen: boolean;
 	onClose: () => void;
 	originRect: DOMRect | null;
@@ -11,6 +15,9 @@ export interface ArticleModalProps {
 
 export const ArticleModal = ({
 	content,
+	title,
+	author,
+	timestamp,
 	isOpen,
 	onClose,
 	originRect,
@@ -122,21 +129,7 @@ export const ArticleModal = ({
 						exit={{ opacity: 0, scale: 0.8 }}
 						transition={{ duration: 0.2, delay: 0.1 }}
 					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							className="h-6 w-6"
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke="currentColor"
-							aria-hidden="true"
-						>
-							<path
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								strokeWidth={2}
-								d="M6 18L18 6M6 6l12 12"
-							/>
-						</svg>
+						<X className="h-6 w-6" />
 					</motion.button>
 
 					<motion.div
@@ -161,6 +154,9 @@ export const ArticleModal = ({
 						<div className="overflow-y-auto flex-1 h-full">
 							<ArticleCard
 								content={content}
+								title={title}
+								author={author}
+								timestamp={timestamp}
 								className="shadow-2xl min-h-full"
 							/>
 						</div>

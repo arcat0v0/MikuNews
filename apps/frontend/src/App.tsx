@@ -11,6 +11,9 @@ const rawRectangles: RectangleProps[] = loadArticlesAsRectangles();
 function App() {
 	const [selectedArticle, setSelectedArticle] = useState<{
 		content: string;
+		title?: string;
+		author?: string;
+		timestamp?: number;
 		originRect: DOMRect | null;
 	} | null>(null);
 
@@ -43,6 +46,9 @@ function App() {
 											const domRect = target.getBoundingClientRect();
 											setSelectedArticle({
 												content: rect.content || "",
+												title: rect.title,
+												author: rect.author,
+												timestamp: rect.timestamp,
 												originRect: domRect,
 											});
 										}
@@ -56,6 +62,9 @@ function App() {
 			{/* 文章详情模态框 */}
 			<ArticleModal
 				content={selectedArticle?.content || ""}
+				title={selectedArticle?.title}
+				author={selectedArticle?.author}
+				timestamp={selectedArticle?.timestamp}
 				isOpen={!!selectedArticle}
 				onClose={() => setSelectedArticle(null)}
 				originRect={selectedArticle?.originRect || null}

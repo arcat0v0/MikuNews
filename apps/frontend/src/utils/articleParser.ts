@@ -8,6 +8,7 @@ export interface ArticleFrontMatter {
 	description?: string;
 	backgroundImage?: string;
 	timestamp: number;
+	author?: string;
 }
 
 export interface Article extends ArticleFrontMatter {
@@ -48,6 +49,7 @@ export function parseArticle(markdown: string, slug: string): Article | null {
 			description: data.description,
 			backgroundImage: data.backgroundImage,
 			timestamp: data.timestamp,
+			author: data.author,
 			content: content.trim(),
 			slug,
 		};
@@ -68,6 +70,7 @@ export function articleToRectangle(article: Article): RectangleProps {
 		description: article.description,
 		backgroundImage: article.backgroundImage,
 		timestamp: article.timestamp,
+		author: article.author,
 		content: article.content,
 		slug: article.slug,
 	};

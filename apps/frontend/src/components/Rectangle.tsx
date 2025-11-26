@@ -1,3 +1,5 @@
+import { formatTimestamp } from "../utils/dateFormatter";
+
 export interface RectangleProps {
 	importance?: 1 | 2 | 3 | 4; // 重要程度：1=宽高各占一半, 2=宽一半高1/4, 3=宽1/4高一半, 4=各占1/4
 	color: string;
@@ -10,6 +12,7 @@ export interface RectangleProps {
 	textColor?: string;
 	descriptionColor?: string;
 	timestamp?: number; // 时间戳，用于排序
+	author?: string; // 作者名称
 	content?: string; // Markdown 文章内容
 	slug?: string; // 文章唯一标识
 	onClick?: (e: React.MouseEvent<HTMLDivElement>) => void; // 点击事件处理器
@@ -61,41 +64,29 @@ export const Rectangle = ({
 	}
 
 	const useFontFamily = fontFamily || "DeYiHei, sans-serif";
-	const titleColor = textColor || "text-gray-900/60";
+	const titleColor = textColor || "text-gray-900/70";
 	const descColor = descriptionColor || textColor || "text-gray-800/50";
-
-	// 格式化时间戳为本地时间
-	const formatTimestamp = (ts?: number) => {
-		if (!ts) return "";
-		return new Date(ts).toLocaleString(undefined, {
-			dateStyle: "medium",
-			timeStyle: "short",
-		});
-	};
-
-	// 公共样式
-	const commonClassName =
-		"group hover:opacity-90 transition-opacity duration-300 flex items-center justify-center p-6 relative overflow-hidden";
-	const commonStyle = {
-		backgroundColor: color,
-		gridColumn: `span ${colSpan}`,
-		gridRow: `span ${rowSpan}`,
-		height:
-			importance === 1
-				? "50vh"
-				: importance === 2
-					? "25vh"
-					: importance === 3
-						? "50vh"
-						: "25vh",
-		...(onClick && { cursor: "pointer" }),
-	};
 
 	return (
 		// biome-ignore lint/a11y/noStaticElementInteractions: I don't know how to fix it
 		<div
-			className={commonClassName}
-			style={commonStyle}
+			className={
+				"group hover:opacity-90 transition-opacity duration-300 flex items-center justify-center p-6 relative overflow-hidden"
+			}
+			style={{
+				backgroundColor: color,
+				gridColumn: `span ${colSpan}`,
+				gridRow: `span ${rowSpan}`,
+				height:
+					importance === 1
+						? "50vh"
+						: importance === 2
+							? "25vh"
+							: importance === 3
+								? "50vh"
+								: "25vh",
+				...(onClick && { cursor: "pointer" }),
+			}}
 			onClick={onClick ?? undefined}
 			tabIndex={onClick ? 0 : undefined}
 			onKeyDown={
@@ -125,7 +116,7 @@ export const Rectangle = ({
 			{/* 背景图片 */}
 			{!backgroundVideo && backgroundImage && (
 				<div
-					className="absolute inset-0 w-full h-full bg-cover bg-center"
+					className="absolute inset-0 w-full h-full bg-cover bg-center group-hover:opacity-70 transition-opacity duration-300"
 					style={{ backgroundImage: `url(${backgroundImage})` }}
 				/>
 			)}
@@ -150,7 +141,7 @@ export const Rectangle = ({
 				{/* 时间信息，使用系统默认字体 */}
 				{timestamp && (
 					<p
-						className="text-sm text-gray-500/70 group-hover:text-gray-600 transition-colors duration-300 mt-2"
+						className="text-base text-gray-600/70 group-hover:text-gray-700 transition-colors duration-300 mt-2"
 						style={{ fontFamily: "sans-serif" }}
 					>
 						{formatTimestamp(timestamp)}

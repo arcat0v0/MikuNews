@@ -79,8 +79,24 @@ function buildCompleteRow(remaining: RectangleProps[]): RectangleProps[] {
 		const nextIndex = findBestMatch(remaining, needed, row[row.length - 1]);
 
 		if (nextIndex === -1) {
-			// 找不到合适的元素，回退第一个元素，尝试其他组合
-			remaining.unshift(first);
+			// 找不到合适的元素
+			// 优化：如果第一个元素不是importance=1，检查后面是否有importance=1
+			// 如果有，把1移到前面，可以更好地填充空间
+			if (first.importance !== 1) {
+				const index1 = remaining.findIndex((item) => item.importance === 1);
+				if (index1 !== -1) {
+					// 把row的所有元素放回去
+					remaining.unshift(...row);
+					// 把找到的1移到最前面
+					const item1 = remaining.splice(index1 + row.length, 1)[0];
+					remaining.unshift(item1);
+					// 递归重新构建这一行
+					return buildCompleteRow(remaining);
+				}
+			}
+
+			// 找不到合适的元素，回退所有元素
+			remaining.unshift(...row);
 			return [];
 		}
 
