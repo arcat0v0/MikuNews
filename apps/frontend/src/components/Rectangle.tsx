@@ -12,7 +12,7 @@ export interface RectangleProps {
 	timestamp?: number; // 时间戳，用于排序
 	content?: string; // Markdown 文章内容
 	slug?: string; // 文章唯一标识
-	onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void; // 点击事件处理器
+	onClick?: (e: React.MouseEvent<HTMLDivElement>) => void; // 点击事件处理器
 }
 
 export const Rectangle = ({
@@ -60,7 +60,7 @@ export const Rectangle = ({
 		}
 	}
 
-	const useFontFamily = fontFamily || "PingFangLaiJiangHu, sans-serif";
+	const useFontFamily = fontFamily || "DeYiHei, sans-serif";
 	const titleColor = textColor || "text-gray-900/60";
 	const descColor = descriptionColor || textColor || "text-gray-800/50";
 
@@ -88,11 +88,27 @@ export const Rectangle = ({
 					: importance === 3
 						? "50vh"
 						: "25vh",
+		...(onClick && { cursor: "pointer" }),
 	};
 
-	// 公共内容
-	const content = (
-		<>
+	return (
+		// biome-ignore lint/a11y/noStaticElementInteractions: I don't know how to fix it
+		<div
+			className={commonClassName}
+			style={commonStyle}
+			onClick={onClick ?? undefined}
+			tabIndex={onClick ? 0 : undefined}
+			onKeyDown={
+				onClick
+					? (e) => {
+							if (e.key === "Enter" || e.key === " ") {
+								e.preventDefault();
+								onClick(e as unknown as React.MouseEvent<HTMLDivElement>);
+							}
+						}
+					: undefined
+			}
+		>
 			{/* 背景视频 */}
 			{backgroundVideo && (
 				<video
@@ -141,32 +157,6 @@ export const Rectangle = ({
 					</p>
 				)}
 			</div>
-		</>
-	);
-
-	// 如果有 onClick，渲染 button；否则渲染 div
-	if (onClick) {
-		return (
-			<button
-				type="button"
-				className={commonClassName}
-				style={{
-					...commonStyle,
-					cursor: "pointer",
-					border: "none",
-					font: "inherit",
-					textAlign: "inherit",
-				}}
-				onClick={onClick}
-			>
-				{content}
-			</button>
-		);
-	}
-
-	return (
-		<div className={commonClassName} style={commonStyle}>
-			{content}
 		</div>
 	);
 };

@@ -6,6 +6,7 @@ export interface ArticleFrontMatter {
 	importance: 1 | 2 | 3 | 4;
 	color: string;
 	description?: string;
+	backgroundImage?: string;
 	timestamp: number;
 }
 
@@ -45,6 +46,7 @@ export function parseArticle(markdown: string, slug: string): Article | null {
 			importance: data.importance as 1 | 2 | 3 | 4,
 			color: data.color,
 			description: data.description,
+			backgroundImage: data.backgroundImage,
 			timestamp: data.timestamp,
 			content: content.trim(),
 			slug,
@@ -64,6 +66,7 @@ export function articleToRectangle(article: Article): RectangleProps {
 		importance: article.importance,
 		color: article.color,
 		description: article.description,
+		backgroundImage: article.backgroundImage,
 		timestamp: article.timestamp,
 		content: article.content,
 		slug: article.slug,
