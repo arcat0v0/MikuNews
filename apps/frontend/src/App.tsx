@@ -54,7 +54,7 @@ function App() {
 	return (
 		<>
 			<div className="bg-white overflow-hidden">
-				<div className="grid grid-cols-4 grid-rows-4 gap-px bg-gray-300">
+				<div className="grid grid-cols-4 auto-rows-auto bg-gray-300">
 					{rectangles.map((rect: LayoutItem, index: number) =>
 						rect.isWebsiteInfo ? (
 							// 渲染网站信息卡片

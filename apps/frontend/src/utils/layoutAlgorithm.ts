@@ -109,41 +109,32 @@ export function autoLayout(rectangles: RectangleProps[]): LayoutItem[] {
 		return sum + area;
 	}, 0);
 
-	// 特殊逻辑：如果占据了最后一行左列的一半 (Area % 8 == 2)
-	// 解释：
-	// - Imp 1 是 2x2 (Area 4)
-	// - 左列 (Cols 1-2) 是 2宽. 如果高也是2 (对应Imp 1高度), 面积是4.
-	// - "左列的一半" 即面积2.
-	// - 所以如果 totalArea % 8 == 2, 说明在一个2行高的块中, 我们有2个单位的内容.
-	// 此时填充黑色空卡片填满左列, 右列放一个Imp 1的网站卡片.
-	if (totalArea % 8 === 2) {
-		// 还需要2个单位填满左列 (4-2=2)
-		result.push(createEmptyCard(2));
-		// 右列放Imp 1 (Area 4)
+	// 常规逻辑
+	// 每一行满是4个单位面积 (宽4 x 高1)
+	// 我们需要总面积是4的倍数以形成矩形块
+	const remainder = totalArea % 4;
+	const neededArea = remainder === 0 ? 0 : 4 - remainder;
+
+	// 尝试添加一个网站信息卡片看看是否能填满
+	// 如果 neededArea > 0，我们尝试找到一个网站卡片填满它
+	// 如果 neededArea === 0，说明当前已经满了，需要另起一行，加一个importance=1 (area=4) 的卡片
+
+	if (neededArea === 0) {
+		// 刚好填满，需要另起一行
+		// 使用一个 importance=1 (2x2, Area 4) 的网站信息卡片
 		result.push(createWebsiteInfoCard(1));
 	} else {
-		// 常规逻辑
-		// 每一行满是4个单位面积 (宽4 x 高1)
-		// 我们需要总面积是4的倍数以形成矩形块
-		const remainder = totalArea % 4;
-		const neededArea = remainder === 0 ? 0 : 4 - remainder;
-
-		if (neededArea === 0) {
-			// 刚好填满，添加两个 importance=2 的卡片
-			// 其中一个作为网站信息卡片，另一个作为黑色填充卡片
-			result.push(createWebsiteInfoCard(2), createEmptyCard(2));
-		} else {
-			// 根据需要的面积选择合适的卡片组合
-			const fillerCards = selectFillerCardsByArea(neededArea);
-			result.push(...fillerCards);
-		}
+		// 根据需要的面积选择合适的卡片组合
+		// 优先使用网站信息卡片填满
+		const fillerCards = selectFillerCardsByArea(neededArea);
+		result.push(...fillerCards);
 	}
 
 	return result;
 }
 
 /**
- * 根据需要的面积选择合适的卡片组合 (确保只有一个网站信息卡片)
+ * 根据需要的面积选择合适的卡片组合
  * @param neededArea 需要填充的面积
  * @returns 卡片数组
  */
@@ -156,8 +147,9 @@ function selectFillerCardsByArea(neededArea: number): LayoutItem[] {
 			// 需要面积2：使用1个 importance=2 (2x1) 的网站信息卡片
 			return [createWebsiteInfoCard(2)];
 		case 3:
-			// 需要面积3：使用1个 importance=2 (2x1) 的网站信息卡片 + 1个 importance=4 (1x1) 的空卡片
-			return [createWebsiteInfoCard(2), createEmptyCard(4)];
+			// 需要面积3：使用1个 importance=4 (1x1) 的空卡片 + 1个 importance=2 (2x1) 的网站信息卡片
+			// 先添加空卡片，再添加网站信息卡片
+			return [createEmptyCard(4), createWebsiteInfoCard(2)];
 		default:
 			return [];
 	}
