@@ -1,10 +1,6 @@
 export interface RectangleProps {
-	colSpan: number;
-	rowSpan: number;
-	colorFrom: string;
-	colorTo: string;
-	hoverFrom: string;
-	hoverTo: string;
+	importance?: 1 | 2 | 3 | 4; // 重要程度：1=宽高各占一半, 2=宽一半高1/4, 3=宽1/4高一半, 4=各占1/4
+	color: string;
 	title: string;
 	description?: string;
 	fontUrl?: string;
@@ -17,12 +13,8 @@ export interface RectangleProps {
 }
 
 export const Rectangle = ({
-	colSpan,
-	rowSpan,
-	colorFrom,
-	colorTo,
-	hoverFrom,
-	hoverTo,
+	importance = 4,
+	color,
 	title,
 	description,
 	fontUrl,
@@ -33,6 +25,18 @@ export const Rectangle = ({
 	descriptionColor,
 	timestamp,
 }: RectangleProps) => {
+	// 根据重要程度计算 colSpan 和 rowSpan
+	const getSpanFromImportance = (imp: 1 | 2 | 3 | 4) => {
+		const spanMap = {
+			1: { colSpan: 2, rowSpan: 2 }, // 宽高各占一半
+			2: { colSpan: 2, rowSpan: 1 }, // 宽一半，高1/4
+			3: { colSpan: 1, rowSpan: 2 }, // 宽1/4，高一半
+			4: { colSpan: 1, rowSpan: 1 }, // 各占1/4
+		};
+		return spanMap[imp];
+	};
+
+	const { colSpan, rowSpan } = getSpanFromImportance(importance);
 	// 动态加载自定义字体
 	if (fontUrl && fontFamily) {
 		const style = document.createElement("style");
@@ -65,10 +69,18 @@ export const Rectangle = ({
 
 	return (
 		<div
-			className={`group bg-linear-to-br from-${colorFrom} to-${colorTo} hover:from-${hoverFrom} hover:to-${hoverTo} transition-colors duration-300 flex items-center justify-center p-6 relative overflow-hidden`}
+			className={`group ${color} hover:opacity-90 transition-opacity duration-300 flex items-center justify-center p-6 relative overflow-hidden`}
 			style={{
 				gridColumn: `span ${colSpan}`,
 				gridRow: `span ${rowSpan}`,
+				height:
+					importance === 1
+						? "50vh"
+						: importance === 2
+							? "25vh"
+							: importance === 3
+								? "50vh"
+								: "25vh",
 			}}
 		>
 			{/* 背景视频 */}

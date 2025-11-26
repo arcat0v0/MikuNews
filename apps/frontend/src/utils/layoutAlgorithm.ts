@@ -1,23 +1,34 @@
 import type { RectangleProps } from "../components/Rectangle";
 
-interface GridCell {
-	occupied: boolean;
+/**
+ * 根据重要程度获取占用的列数
+ */
+function getColSpan(importance: 1 | 2 | 3 | 4 = 4): number {
+	const colSpanMap = {
+		1: 2, // 宽高各占一半
+		2: 2, // 宽一半，高1/4
+		3: 1, // 宽1/4，高一半
+		4: 1, // 各占1/4
+	};
+	return colSpanMap[importance];
 }
 
 /**
  * 自动布局算法
+ * 根据重要级别重新排序数组，确保每行横向占满4列
+ *
+ * 布局规则（4列网格）：
+ * - importance=1 (2x2): 占2列，后面需要再2列 -> 可跟 1/2/33/44
+ * - importance=2 (2x1): 占2列，后面需要再2列 -> 可跟 1/2/33/44
+ * - importance=3 (1x2): 占1列，后面需要再3列 -> 可跟 3(+需要2列)/44(+需要1列)
+ * - importance=4 (1x1): 占1列，后面需要再3列 -> 可跟 4(+需要2列)
+ *
  * @param rectangles 待布局的矩形数组
- * @param gridCols 网格列数（默认4）
- * @param gridRows 网格行数（默认4）
- * @returns 排序并添加了位置信息的矩形数组
+ * @returns 优化排序后的矩形数组
  */
-export function autoLayout(
-	rectangles: RectangleProps[],
-	gridCols: number = 4,
-	gridRows: number = 4,
-): RectangleProps[] {
+export function autoLayout(rectangles: RectangleProps[]): RectangleProps[] {
 	// 1. 按时间戳排序作为基础优先级
-	const sortedRectangles = [...rectangles].sort((a, b) => {
+	const sorted = [...rectangles].sort((a, b) => {
 		if (a.timestamp !== undefined && b.timestamp !== undefined) {
 			return b.timestamp - a.timestamp; // 降序，最新的在前
 		}
@@ -26,126 +37,151 @@ export function autoLayout(
 		return 0;
 	});
 
-	// 2. 创建网格占用表
-	const grid: GridCell[][] = Array.from({ length: gridRows }, () =>
-		Array.from({ length: gridCols }, () => ({ occupied: false })),
-	);
+	// 2. 根据布局规则重新排序
+	const result: RectangleProps[] = [];
+	const remaining = [...sorted];
 
-	const placedRectangles: RectangleProps[] = [];
-	const placedIndices = new Set<number>();
+	while (remaining.length > 0) {
+		// 尝试构建完整的一行（4列）
+		const rowItems = buildCompleteRow(remaining);
 
-	// 3. 网格遍历填充策略
-	// 遍历每一个网格单元，寻找最适合该位置的矩形
-	// 这种方法可以最大程度减少中间的空洞，将空白挤压到最后
-	for (let row = 0; row < gridRows; row++) {
-		for (let col = 0; col < gridCols; col++) {
-			// 如果当前格子已被占用，跳过
-			if (grid[row][col].occupied) continue;
+		if (rowItems.length > 0) {
+			result.push(...rowItems);
+		} else {
+			// 如果无法构建完整行，直接取剩余元素（避免死循环）
+			result.push(...remaining);
+			break;
+		}
+	}
 
-			// 在剩余的矩形中寻找最适合放在当前位置(row, col)的矩形
-			let bestCandidateIndex = -1;
-			let maxScore = -Number.MAX_VALUE;
+	return result;
+}
 
-			for (let i = 0; i < sortedRectangles.length; i++) {
-				if (placedIndices.has(i)) continue;
+/**
+ * 从剩余元素中构建一个完整的行（4列）
+ * @param remaining 剩余元素数组（会被修改）
+ * @returns 构成一行的元素数组
+ */
+function buildCompleteRow(remaining: RectangleProps[]): RectangleProps[] {
+	if (remaining.length === 0) return [];
 
-				const rect = sortedRectangles[i];
+	const row: RectangleProps[] = [];
+	let colsUsed = 0;
 
-				// 检查边界
-				if (row + rect.rowSpan > gridRows || col + rect.colSpan > gridCols)
-					continue;
+	// 取第一个元素
+	const first = remaining.shift()!;
+	row.push(first);
+	colsUsed += getColSpan(first.importance);
 
-				// 检查是否与已有矩形重叠
-				if (!canPlace(grid, row, col, rect.rowSpan, rect.colSpan)) continue;
+	// 根据已占用列数，继续填充直到满4列
+	while (colsUsed < 4 && remaining.length > 0) {
+		const needed = 4 - colsUsed;
+		const nextIndex = findBestMatch(remaining, needed, row[row.length - 1]);
 
-				// 评分标准：
-				// 1. 优先选择面积大的矩形（减少碎片化）
-				// 2. 面积相同时，优先选择原始排序靠前的（时间戳新的）
-				const area = rect.rowSpan * rect.colSpan;
-				// 面积权重设为1000，确保面积优先。减去索引 i 确保同面积下索引小的优先
-				const score = area * 1000 - i;
+		if (nextIndex === -1) {
+			// 找不到合适的元素，回退第一个元素，尝试其他组合
+			remaining.unshift(first);
+			return [];
+		}
 
-				if (score > maxScore) {
-					maxScore = score;
-					bestCandidateIndex = i;
+		const next = remaining.splice(nextIndex, 1)[0];
+		row.push(next);
+		colsUsed += getColSpan(next.importance);
+	}
+
+	// 检查是否正好填满4列
+	if (colsUsed === 4) {
+		return row;
+	} else {
+		// 如果没有填满，回退所有元素
+		remaining.unshift(...row);
+		return [];
+	}
+}
+
+/**
+ * 根据需要的列数和上一个元素，找到最合适的元素索引
+ * @param items 剩余的元素数组
+ * @param neededCols 还需要多少列才能填满4列
+ * @param prevItem 上一个放置的元素
+ * @returns 找到的元素索引，-1表示未找到
+ */
+function findBestMatch(
+	items: RectangleProps[],
+	neededCols: number,
+	prevItem: RectangleProps,
+): number {
+	const prevImportance = prevItem.importance || 4;
+
+	// 情况1: 需要2列（前面已经放了占2列的元素，如 importance=1 或 2）
+	if (neededCols === 2) {
+		// 可以放：1、2、3、4
+		// 优先级：先找1或2（正好占2列），然后找3，最后找4
+
+		// 优先找占2列的
+		let index = items.findIndex(
+			(item) => getColSpan(item.importance) === 2
+		);
+		if (index !== -1) return index;
+
+		// 其次找3（占1列，后续还需要1列）
+		index = items.findIndex((item) => item.importance === 3);
+		if (index !== -1) return index;
+
+		// 最后找4
+		index = items.findIndex((item) => item.importance === 4);
+		return index;
+	}
+
+	// 情况2: 需要1列（前面已经放了3列）
+	if (neededCols === 1) {
+		// 根据前一个元素的规则：
+		// - 如果前一个是3，这一个只能是3
+		// - 如果前一个是4，这一个只能是4
+
+		if (prevImportance === 3) {
+			return items.findIndex((item) => item.importance === 3);
+		}
+		if (prevImportance === 4) {
+			return items.findIndex((item) => item.importance === 4);
+		}
+
+		// 否则找任何占1列的
+		return items.findIndex((item) => getColSpan(item.importance) === 1);
+	}
+
+	// 情况3: 需要3列（前面已经放了占1列的元素，如 importance=3 或 4）
+	if (neededCols === 3) {
+		// 根据规则：
+		// - 如果前一个是3，后面必须跟3，或者跟44
+		// - 如果前一个是4，后面必须跟4
+
+		if (prevImportance === 3) {
+			// 优先找另一个3
+			const index3 = items.findIndex((item) => item.importance === 3);
+			if (index3 !== -1) return index3;
+
+			// 或者找两个4
+			const index4 = items.findIndex((item) => item.importance === 4);
+			if (index4 !== -1) {
+				// 检查后面是否还有第二个4
+				const secondIndex4 = items.findIndex(
+					(item, idx) => idx > index4 && item.importance === 4
+				);
+				if (secondIndex4 !== -1) {
+					return index4; // 返回第一个4
 				}
 			}
-
-			// 如果找到了合适的矩形，放置它
-			if (bestCandidateIndex !== -1) {
-				const rect = sortedRectangles[bestCandidateIndex];
-				markOccupied(grid, row, col, rect.rowSpan, rect.colSpan, true);
-				placedRectangles.push(rect);
-				placedIndices.add(bestCandidateIndex);
-			}
 		}
+
+		if (prevImportance === 4) {
+			// 必须找另一个4
+			return items.findIndex((item) => item.importance === 4);
+		}
+
+		// 否则找任何占1列的
+		return items.findIndex((item) => getColSpan(item.importance) === 1);
 	}
 
-	return placedRectangles;
-}
-
-/**
- * 检查指定位置是否可以放置矩形
- */
-function canPlace(
-	grid: GridCell[][],
-	startRow: number,
-	startCol: number,
-	rowSpan: number,
-	colSpan: number,
-): boolean {
-	for (let r = startRow; r < startRow + rowSpan; r++) {
-		for (let c = startCol; c < startCol + colSpan; c++) {
-			if (grid[r][c].occupied) {
-				return false;
-			}
-		}
-	}
-	return true;
-}
-
-/**
- * 标记网格区域为已占用或未占用
- */
-function markOccupied(
-	grid: GridCell[][],
-	startRow: number,
-	startCol: number,
-	rowSpan: number,
-	colSpan: number,
-	occupied: boolean,
-): void {
-	for (let r = startRow; r < startRow + rowSpan; r++) {
-		for (let c = startCol; c < startCol + colSpan; c++) {
-			grid[r][c].occupied = occupied;
-		}
-	}
-}
-
-/**
- * 计算已占用区域的"重心"位置
- * 用于评估布局的紧凑度（重心越靠左上越好）
- */
-function calculateCenterOfMass(grid: GridCell[][]): {
-	row: number;
-	col: number;
-} {
-	let totalRow = 0;
-	let totalCol = 0;
-	let count = 0;
-
-	for (let r = 0; r < grid.length; r++) {
-		for (let c = 0; c < grid[r].length; c++) {
-			if (grid[r][c].occupied) {
-				totalRow += r;
-				totalCol += c;
-				count++;
-			}
-		}
-	}
-
-	return {
-		row: count > 0 ? totalRow / count : 0,
-		col: count > 0 ? totalCol / count : 0,
-	};
+	return -1;
 }
