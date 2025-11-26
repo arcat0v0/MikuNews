@@ -12,7 +12,7 @@ export interface RectangleProps {
 	timestamp?: number; // 时间戳，用于排序
 	content?: string; // Markdown 文章内容
 	slug?: string; // 文章唯一标识
-	onClick?: () => void; // 点击事件处理器
+	onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void; // 点击事件处理器
 }
 
 export const Rectangle = ({

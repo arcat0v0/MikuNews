@@ -11,6 +11,7 @@ const rawRectangles: RectangleProps[] = loadArticlesAsRectangles();
 function App() {
 	const [selectedArticle, setSelectedArticle] = useState<{
 		content: string;
+		originRect: DOMRect | null;
 	} | null>(null);
 
 	// 使用布局算法自动排序
@@ -37,7 +38,14 @@ function App() {
 							{...rect}
 							onClick={
 								rect.content
-									? () => setSelectedArticle({ content: rect.content! })
+									? (e) => {
+											const target = e.currentTarget;
+											const domRect = target.getBoundingClientRect();
+											setSelectedArticle({
+												content: rect.content || "",
+												originRect: domRect,
+											});
+										}
 									: undefined
 							}
 						/>
@@ -50,6 +58,7 @@ function App() {
 				content={selectedArticle?.content || ""}
 				isOpen={!!selectedArticle}
 				onClose={() => setSelectedArticle(null)}
+				originRect={selectedArticle?.originRect || null}
 			/>
 		</>
 	);
