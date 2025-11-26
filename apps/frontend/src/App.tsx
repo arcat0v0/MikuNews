@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Rectangle, type RectangleProps } from "./components/Rectangle";
+import { WebsiteInfoCard } from "./components/WebsiteInfoCard";
 import { ArticleModal } from "./components/ArticleModal";
 import { loadArticlesAsRectangles } from "./utils/articleParser";
-import { autoLayout } from "./utils/layoutAlgorithm";
+import { autoLayout, type LayoutItem } from "./utils/layoutAlgorithm";
 import "./App.css";
 
 // 在模块顶层同步加载所有文章（编译时已打包）
@@ -16,6 +17,23 @@ function App() {
 		timestamp?: number;
 		originRect: DOMRect | null;
 	} | null>(null);
+
+	// 检测暗黑模式
+	const [isDarkMode, setIsDarkMode] = useState(false);
+
+	useEffect(() => {
+		// 初始检测
+		const darkModeMediaQuery = window.matchMedia(
+			"(prefers-color-scheme: dark)",
+		);
+		setIsDarkMode(darkModeMediaQuery.matches);
+
+		// 监听变化
+		const handler = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
+		darkModeMediaQuery.addEventListener("change", handler);
+
+		return () => darkModeMediaQuery.removeEventListener("change", handler);
+	}, []);
 
 	// 使用布局算法自动排序
 	const rectangles = useMemo(() => {
@@ -35,27 +53,37 @@ function App() {
 		<>
 			<div className="bg-white overflow-hidden">
 				<div className="grid grid-cols-4 grid-rows-4 gap-px bg-gray-300">
-					{rectangles.map((rect, index) => (
-						<Rectangle
-							key={`rectangle-${index}-${rect.title}`}
-							{...rect}
-							onClick={
-								rect.content
-									? (e) => {
-											const target = e.currentTarget;
-											const domRect = target.getBoundingClientRect();
-											setSelectedArticle({
-												content: rect.content || "",
-												title: rect.title,
-												author: rect.author,
-												timestamp: rect.timestamp,
-												originRect: domRect,
-											});
-										}
-									: undefined
-							}
-						/>
-					))}
+					{rectangles.map((rect: LayoutItem, index: number) =>
+						rect.isWebsiteInfo ? (
+							// 渲染网站信息卡片
+							<WebsiteInfoCard
+								key="website-info"
+								importance={rect.importance}
+								isDarkMode={isDarkMode}
+							/>
+						) : (
+							// 渲染普通文章卡片
+							<Rectangle
+								key={`rectangle-${index}-${rect.title}`}
+								{...rect}
+								onClick={
+									rect.content
+										? (e) => {
+												const target = e.currentTarget;
+												const domRect = target.getBoundingClientRect();
+												setSelectedArticle({
+													content: rect.content || "",
+													title: rect.title,
+													author: rect.author,
+													timestamp: rect.timestamp,
+													originRect: domRect,
+												});
+											}
+										: undefined
+								}
+							/>
+						),
+					)}
 				</div>
 			</div>
 

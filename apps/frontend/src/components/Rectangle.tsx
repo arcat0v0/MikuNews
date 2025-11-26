@@ -16,6 +16,7 @@ export interface RectangleProps {
 	content?: string; // Markdown 文章内容
 	slug?: string; // 文章唯一标识
 	onClick?: (e: React.MouseEvent<HTMLDivElement>) => void; // 点击事件处理器
+	isEmpty?: boolean; // 是否为空卡片
 }
 
 export const Rectangle = ({
@@ -33,6 +34,7 @@ export const Rectangle = ({
 	content: _content, // 保留用于传递，但组件本身不使用
 	slug: _slug, // 保留用于传递，但组件本身不使用
 	onClick,
+	isEmpty,
 }: RectangleProps) => {
 	// 根据重要程度计算 colSpan 和 rowSpan
 	const getSpanFromImportance = (imp: 1 | 2 | 3 | 4) => {
@@ -46,6 +48,28 @@ export const Rectangle = ({
 	};
 
 	const { colSpan, rowSpan } = getSpanFromImportance(importance);
+
+	// 如果是空卡片，直接渲染纯黑背景
+	if (isEmpty) {
+		return (
+			<div
+				className="bg-black"
+				style={{
+					gridColumn: `span ${colSpan}`,
+					gridRow: `span ${rowSpan}`,
+					height:
+						importance === 1
+							? "50vh"
+							: importance === 2
+								? "25vh"
+								: importance === 3
+									? "50vh"
+									: "25vh",
+				}}
+			/>
+		);
+	}
+
 	// 动态加载自定义字体
 	if (fontUrl && fontFamily) {
 		const style = document.createElement("style");

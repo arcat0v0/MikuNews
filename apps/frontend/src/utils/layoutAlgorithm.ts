@@ -1,5 +1,11 @@
 import type { RectangleProps } from "../components/Rectangle";
 
+// 扩展接口以支持网站信息卡片标识
+export interface LayoutItem extends RectangleProps {
+	isWebsiteInfo?: boolean; // 标识是否为网站信息卡片
+	isEmpty?: boolean; // 标识是否为填充用的空卡片
+}
+
 /**
  * 根据重要程度获取占用的列数
  */
@@ -14,8 +20,50 @@ function getColSpan(importance: 1 | 2 | 3 | 4 = 4): number {
 }
 
 /**
+ * 根据重要程度获取占用的网格面积 (1x1单位)
+ */
+function getArea(importance: 1 | 2 | 3 | 4 = 4): number {
+	const areaMap = {
+		1: 4, // 2x2 = 4
+		2: 2, // 2x1 = 2
+		3: 2, // 1x2 = 2
+		4: 1, // 1x1 = 1
+	};
+	return areaMap[importance];
+}
+
+/**
+ * 创建网站信息卡片
+ * @param importance 重要级别
+ * @returns 网站信息卡片对象
+ */
+function createWebsiteInfoCard(importance: 1 | 2 | 3 | 4): LayoutItem {
+	return {
+		importance,
+		color: "#FFFFFF", // 默认白色，实际渲染时会根据暗黑模式调整
+		title: "MikuNews",
+		isWebsiteInfo: true,
+	};
+}
+
+/**
+ * 创建空填充卡片
+ * @param importance 重要级别
+ * @returns 空卡片对象
+ */
+function createEmptyCard(importance: 1 | 2 | 3 | 4): LayoutItem {
+	return {
+		importance,
+		color: "#000000", // 黑色
+		title: "",
+		isEmpty: true,
+	};
+}
+
+/**
  * 自动布局算法
  * 根据重要级别重新排序数组，确保每行横向占满4列
+ * 自动在末尾添加网站信息卡片填充空隙
  *
  * 布局规则（4列网格）：
  * - importance=1 (2x2): 占2列，后面需要再2列 -> 可跟 1/2/33/44
@@ -24,9 +72,9 @@ function getColSpan(importance: 1 | 2 | 3 | 4 = 4): number {
  * - importance=4 (1x1): 占1列，后面需要再3列 -> 可跟 4(+需要2列)
  *
  * @param rectangles 待布局的矩形数组
- * @returns 优化排序后的矩形数组
+ * @returns 优化排序后的矩形数组（包含网站信息卡片）
  */
-export function autoLayout(rectangles: RectangleProps[]): RectangleProps[] {
+export function autoLayout(rectangles: RectangleProps[]): LayoutItem[] {
 	// 1. 按时间戳排序作为基础优先级
 	const sorted = [...rectangles].sort((a, b) => {
 		if (a.timestamp !== undefined && b.timestamp !== undefined) {
@@ -38,7 +86,7 @@ export function autoLayout(rectangles: RectangleProps[]): RectangleProps[] {
 	});
 
 	// 2. 根据布局规则重新排序
-	const result: RectangleProps[] = [];
+	const result: LayoutItem[] = [];
 	const remaining = [...sorted];
 
 	while (remaining.length > 0) {
@@ -48,13 +96,71 @@ export function autoLayout(rectangles: RectangleProps[]): RectangleProps[] {
 		if (rowItems.length > 0) {
 			result.push(...rowItems);
 		} else {
-			// 如果无法构建完整行，直接取剩余元素（避免死循环）
+			// 如果无法构建完整行，将所有剩余元素添加进去
 			result.push(...remaining);
 			break;
 		}
 	}
 
+	// 3. 检查剩余空间并填充
+	// 使用面积计算而不是仅列宽，因为不同importance高度不同
+	const totalArea = result.reduce((sum, item) => {
+		const area = getArea(item.importance);
+		return sum + area;
+	}, 0);
+
+	// 特殊逻辑：如果占据了最后一行左列的一半 (Area % 8 == 2)
+	// 解释：
+	// - Imp 1 是 2x2 (Area 4)
+	// - 左列 (Cols 1-2) 是 2宽. 如果高也是2 (对应Imp 1高度), 面积是4.
+	// - "左列的一半" 即面积2.
+	// - 所以如果 totalArea % 8 == 2, 说明在一个2行高的块中, 我们有2个单位的内容.
+	// 此时填充黑色空卡片填满左列, 右列放一个Imp 1的网站卡片.
+	if (totalArea % 8 === 2) {
+		// 还需要2个单位填满左列 (4-2=2)
+		result.push(createEmptyCard(2));
+		// 右列放Imp 1 (Area 4)
+		result.push(createWebsiteInfoCard(1));
+	} else {
+		// 常规逻辑
+		// 每一行满是4个单位面积 (宽4 x 高1)
+		// 我们需要总面积是4的倍数以形成矩形块
+		const remainder = totalArea % 4;
+		const neededArea = remainder === 0 ? 0 : 4 - remainder;
+
+		if (neededArea === 0) {
+			// 刚好填满，添加两个 importance=2 的卡片
+			// 其中一个作为网站信息卡片，另一个作为黑色填充卡片
+			result.push(createWebsiteInfoCard(2), createEmptyCard(2));
+		} else {
+			// 根据需要的面积选择合适的卡片组合
+			const fillerCards = selectFillerCardsByArea(neededArea);
+			result.push(...fillerCards);
+		}
+	}
+
 	return result;
+}
+
+/**
+ * 根据需要的面积选择合适的卡片组合 (确保只有一个网站信息卡片)
+ * @param neededArea 需要填充的面积
+ * @returns 卡片数组
+ */
+function selectFillerCardsByArea(neededArea: number): LayoutItem[] {
+	switch (neededArea) {
+		case 1:
+			// 需要面积1：使用1个 importance=4 (1x1) 的网站信息卡片
+			return [createWebsiteInfoCard(4)];
+		case 2:
+			// 需要面积2：使用1个 importance=2 (2x1) 的网站信息卡片
+			return [createWebsiteInfoCard(2)];
+		case 3:
+			// 需要面积3：使用1个 importance=2 (2x1) 的网站信息卡片 + 1个 importance=4 (1x1) 的空卡片
+			return [createWebsiteInfoCard(2), createEmptyCard(4)];
+		default:
+			return [];
+	}
 }
 
 /**
@@ -135,9 +241,7 @@ function findBestMatch(
 		// 优先级：先找1或2（正好占2列），然后找3，最后找4
 
 		// 优先找占2列的
-		let index = items.findIndex(
-			(item) => getColSpan(item.importance) === 2
-		);
+		let index = items.findIndex((item) => getColSpan(item.importance) === 2);
 		if (index !== -1) return index;
 
 		// 其次找3（占1列，后续还需要1列）
@@ -182,7 +286,7 @@ function findBestMatch(
 			if (index4 !== -1) {
 				// 检查后面是否还有第二个4
 				const secondIndex4 = items.findIndex(
-					(item, idx) => idx > index4 && item.importance === 4
+					(item, idx) => idx > index4 && item.importance === 4,
 				);
 				if (secondIndex4 !== -1) {
 					return index4; // 返回第一个4
