@@ -4,6 +4,7 @@ import { WebsiteInfoCard } from "./components/WebsiteInfoCard";
 import { ArticleModal } from "./components/ArticleModal";
 import { loadArticlesAsRectangles } from "./utils/articleParser";
 import { autoLayout, type LayoutItem } from "./utils/layoutAlgorithm";
+import type { MediaItem } from "./utils/articleParser";
 import "./App.css";
 
 // 在模块顶层同步加载所有文章（编译时已打包）
@@ -15,6 +16,7 @@ function App() {
 		title?: string;
 		author?: string;
 		timestamp?: number;
+		gallery?: MediaItem[];
 		originRect: DOMRect | null;
 	} | null>(null);
 
@@ -76,6 +78,7 @@ function App() {
 													title: rect.title,
 													author: rect.author,
 													timestamp: rect.timestamp,
+													gallery: rect.gallery,
 													originRect: domRect,
 												});
 											}
@@ -93,6 +96,7 @@ function App() {
 				title={selectedArticle?.title}
 				author={selectedArticle?.author}
 				timestamp={selectedArticle?.timestamp}
+				gallery={selectedArticle?.gallery}
 				isOpen={!!selectedArticle}
 				onClose={() => setSelectedArticle(null)}
 				originRect={selectedArticle?.originRect || null}

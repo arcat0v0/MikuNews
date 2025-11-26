@@ -1,4 +1,5 @@
 import { formatTimestamp } from "../utils/dateFormatter";
+import type { MediaItem } from "../utils/articleParser";
 
 export interface RectangleProps {
 	importance?: 1 | 2 | 3 | 4; // 重要程度：1=宽高各占一半, 2=宽一半高1/4, 3=宽1/4高一半, 4=各占1/4
@@ -15,6 +16,7 @@ export interface RectangleProps {
 	author?: string; // 作者名称
 	content?: string; // Markdown 文章内容
 	slug?: string; // 文章唯一标识
+	gallery?: MediaItem[]; // 媒体画廊
 	onClick?: (e: React.MouseEvent<HTMLDivElement>) => void; // 点击事件处理器
 	isEmpty?: boolean; // 是否为空卡片
 }

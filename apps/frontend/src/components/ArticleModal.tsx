@@ -2,12 +2,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { ArticleCard } from "./ArticleCard";
+import type { MediaItem } from "../utils/articleParser";
 
 export interface ArticleModalProps {
 	content: string;
 	title?: string;
 	author?: string;
 	timestamp?: number;
+	gallery?: MediaItem[];
 	isOpen: boolean;
 	onClose: () => void;
 	originRect: DOMRect | null;
@@ -18,6 +20,7 @@ export const ArticleModal = ({
 	title,
 	author,
 	timestamp,
+	gallery,
 	isOpen,
 	onClose,
 	originRect,
@@ -157,6 +160,7 @@ export const ArticleModal = ({
 								title={title}
 								author={author}
 								timestamp={timestamp}
+								gallery={gallery}
 								className="shadow-2xl min-h-full"
 							/>
 						</div>

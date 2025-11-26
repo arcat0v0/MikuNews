@@ -1,6 +1,13 @@
 import matter from "gray-matter";
 import type { RectangleProps } from "../components/Rectangle";
 
+export interface MediaItem {
+	type: "image" | "video";
+	src: string;
+	alt?: string;
+	poster?: string; // 视频封面（仅 video 类型）
+}
+
 export interface ArticleFrontMatter {
 	title: string;
 	importance: 1 | 2 | 3 | 4;
@@ -9,6 +16,7 @@ export interface ArticleFrontMatter {
 	backgroundImage?: string;
 	timestamp: number;
 	author?: string;
+	gallery?: MediaItem[]; // 媒体画廊
 }
 
 export interface Article extends ArticleFrontMatter {
@@ -50,6 +58,7 @@ export function parseArticle(markdown: string, slug: string): Article | null {
 			backgroundImage: data.backgroundImage,
 			timestamp: data.timestamp,
 			author: data.author,
+			gallery: data.gallery,
 			content: content.trim(),
 			slug,
 		};
@@ -71,6 +80,7 @@ export function articleToRectangle(article: Article): RectangleProps {
 		backgroundImage: article.backgroundImage,
 		timestamp: article.timestamp,
 		author: article.author,
+		gallery: article.gallery,
 		content: article.content,
 		slug: article.slug,
 	};
