@@ -11,11 +11,16 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",
+    "buffer": "^6.0.3",
     "dayjs": "^1.11.19",
+    "gray-matter": "^4.0.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-markdown": "^10.1.0",
     "react-router": "^7.9.6",
-    "tailwindcss": "^4.1.17"
+    "remark-gfm": "^4.0.1",
+    "tailwindcss": "^4.1.17",
+    "vite-plugin-node-polyfills": "^0.24.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

@@ -10,6 +10,9 @@ export interface RectangleProps {
 	textColor?: string;
 	descriptionColor?: string;
 	timestamp?: number; // 时间戳，用于排序
+	content?: string; // Markdown 文章内容
+	slug?: string; // 文章唯一标识
+	onClick?: () => void; // 点击事件处理器
 }
 
 export const Rectangle = ({
@@ -24,6 +27,9 @@ export const Rectangle = ({
 	textColor,
 	descriptionColor,
 	timestamp,
+	content: _content, // 保留用于传递，但组件本身不使用
+	slug: _slug, // 保留用于传递，但组件本身不使用
+	onClick,
 }: RectangleProps) => {
 	// 根据重要程度计算 colSpan 和 rowSpan
 	const getSpanFromImportance = (imp: 1 | 2 | 3 | 4) => {
@@ -67,22 +73,26 @@ export const Rectangle = ({
 		});
 	};
 
-	return (
-		<div
-			className={`group ${color} hover:opacity-90 transition-opacity duration-300 flex items-center justify-center p-6 relative overflow-hidden`}
-			style={{
-				gridColumn: `span ${colSpan}`,
-				gridRow: `span ${rowSpan}`,
-				height:
-					importance === 1
+	// 公共样式
+	const commonClassName =
+		"group hover:opacity-90 transition-opacity duration-300 flex items-center justify-center p-6 relative overflow-hidden";
+	const commonStyle = {
+		backgroundColor: color,
+		gridColumn: `span ${colSpan}`,
+		gridRow: `span ${rowSpan}`,
+		height:
+			importance === 1
+				? "50vh"
+				: importance === 2
+					? "25vh"
+					: importance === 3
 						? "50vh"
-						: importance === 2
-							? "25vh"
-							: importance === 3
-								? "50vh"
-								: "25vh",
-			}}
-		>
+						: "25vh",
+	};
+
+	// 公共内容
+	const content = (
+		<>
 			{/* 背景视频 */}
 			{backgroundVideo && (
 				<video
@@ -101,7 +111,7 @@ export const Rectangle = ({
 				<div
 					className="absolute inset-0 w-full h-full bg-cover bg-center"
 					style={{ backgroundImage: `url(${backgroundImage})` }}
-				></div>
+				/>
 			)}
 
 			{/* 内容层 */}
@@ -131,6 +141,32 @@ export const Rectangle = ({
 					</p>
 				)}
 			</div>
+		</>
+	);
+
+	// 如果有 onClick，渲染 button；否则渲染 div
+	if (onClick) {
+		return (
+			<button
+				type="button"
+				className={commonClassName}
+				style={{
+					...commonStyle,
+					cursor: "pointer",
+					border: "none",
+					font: "inherit",
+					textAlign: "inherit",
+				}}
+				onClick={onClick}
+			>
+				{content}
+			</button>
+		);
+	}
+
+	return (
+		<div className={commonClassName} style={commonStyle}>
+			{content}
 		</div>
 	);
 };
