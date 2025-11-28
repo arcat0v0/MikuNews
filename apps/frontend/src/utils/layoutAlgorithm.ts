@@ -9,8 +9,9 @@ export interface LayoutItem extends RectangleProps {
 /**
  * 根据重要程度获取占用的列数
  */
-function getColSpan(importance: 1 | 2 | 3 | 4 = 4): number {
+function getColSpan(importance: 0 | 1 | 2 | 3 | 4 = 4): number {
 	const colSpanMap = {
+		0: 4, // 整行
 		1: 2, // 宽高各占一半
 		2: 2, // 宽一半，高1/4
 		3: 1, // 宽1/4，高一半
@@ -22,8 +23,9 @@ function getColSpan(importance: 1 | 2 | 3 | 4 = 4): number {
 /**
  * 根据重要程度获取占用的网格面积 (1x1单位)
  */
-function getArea(importance: 1 | 2 | 3 | 4 = 4): number {
+function getArea(importance: 0 | 1 | 2 | 3 | 4 = 4): number {
 	const areaMap = {
+		0: 8, // 4x2 = 8
 		1: 4, // 2x2 = 4
 		2: 2, // 2x1 = 2
 		3: 2, // 1x2 = 2
@@ -37,7 +39,7 @@ function getArea(importance: 1 | 2 | 3 | 4 = 4): number {
  * @param importance 重要级别
  * @returns 网站信息卡片对象
  */
-function createWebsiteInfoCard(importance: 1 | 2 | 3 | 4): LayoutItem {
+function createWebsiteInfoCard(importance: 0 | 1 | 2 | 3 | 4): LayoutItem {
 	return {
 		importance,
 		color: "#FFFFFF", // 默认白色，实际渲染时会根据暗黑模式调整
@@ -51,7 +53,7 @@ function createWebsiteInfoCard(importance: 1 | 2 | 3 | 4): LayoutItem {
  * @param importance 重要级别
  * @returns 空卡片对象
  */
-function createEmptyCard(importance: 1 | 2 | 3 | 4): LayoutItem {
+function createEmptyCard(importance: 0 | 1 | 2 | 3 | 4): LayoutItem {
 	return {
 		importance,
 		color: "#000000", // 黑色
@@ -85,7 +87,16 @@ export function autoLayout(rectangles: RectangleProps[]): LayoutItem[] {
 		return 0;
 	});
 
-	// 2. 根据布局规则重新排序
+	// 2. 把时间最近的 importance=1 的元素移到最前面
+	const latestImportance1Index = sorted.findIndex(
+		(item) => item.importance === 1,
+	);
+	if (latestImportance1Index > 0) {
+		const [item] = sorted.splice(latestImportance1Index, 1);
+		sorted.unshift(item);
+	}
+
+	// 3. 根据布局规则重新排序
 	const result: LayoutItem[] = [];
 	const remaining = [...sorted];
 
@@ -102,7 +113,7 @@ export function autoLayout(rectangles: RectangleProps[]): LayoutItem[] {
 		}
 	}
 
-	// 3. 检查剩余空间并填充
+	// 4. 检查剩余空间并填充
 	// 使用面积计算而不是仅列宽，因为不同importance高度不同
 	const totalArea = result.reduce((sum, item) => {
 		const area = getArea(item.importance);
@@ -121,8 +132,8 @@ export function autoLayout(rectangles: RectangleProps[]): LayoutItem[] {
 
 	if (neededArea === 0) {
 		// 刚好填满，需要另起一行
-		// 使用一个 importance=1 (2x2, Area 4) 的网站信息卡片
-		result.push(createWebsiteInfoCard(1));
+		// 使用 importance=0 (4x2, 整行) 的网站信息卡片
+		result.push(createWebsiteInfoCard(0));
 	} else {
 		// 根据需要的面积选择合适的卡片组合
 		// 优先使用网站信息卡片填满

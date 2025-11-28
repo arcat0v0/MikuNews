@@ -2,7 +2,7 @@ import { formatTimestamp } from "../utils/dateFormatter";
 import type { MediaItem } from "../utils/articleParser";
 
 export interface RectangleProps {
-	importance?: 1 | 2 | 3 | 4; // 重要程度：1=宽高各占一半, 2=宽一半高1/4, 3=宽1/4高一半, 4=各占1/4
+	importance?: 0 | 1 | 2 | 3 | 4; // 重要程度：0=整行宽高一半, 1=宽高各占一半, 2=宽一半高1/4, 3=宽1/4高一半, 4=各占1/4
 	color: string;
 	title: string;
 	description?: string;
@@ -39,8 +39,9 @@ export const Rectangle = ({
 	isEmpty,
 }: RectangleProps) => {
 	// 根据重要程度计算 colSpan 和 rowSpan
-	const getSpanFromImportance = (imp: 1 | 2 | 3 | 4) => {
+	const getSpanFromImportance = (imp: 0 | 1 | 2 | 3 | 4) => {
 		const spanMap = {
+			0: { colSpan: 4, rowSpan: 2 }, // 整行，高一半
 			1: { colSpan: 2, rowSpan: 2 }, // 宽高各占一半
 			2: { colSpan: 2, rowSpan: 1 }, // 宽一半，高1/4
 			3: { colSpan: 1, rowSpan: 2 }, // 宽1/4，高一半
@@ -60,13 +61,9 @@ export const Rectangle = ({
 					gridColumn: `span ${colSpan}`,
 					gridRow: `span ${rowSpan}`,
 					height:
-						importance === 1
+						importance === 0 || importance === 1 || importance === 3
 							? "50vh"
-							: importance === 2
-								? "25vh"
-								: importance === 3
-									? "50vh"
-									: "25vh",
+							: "25vh",
 				}}
 			/>
 		);
@@ -104,13 +101,9 @@ export const Rectangle = ({
 				gridColumn: `span ${colSpan}`,
 				gridRow: `span ${rowSpan}`,
 				height:
-					importance === 1
+					importance === 0 || importance === 1 || importance === 3
 						? "50vh"
-						: importance === 2
-							? "25vh"
-							: importance === 3
-								? "50vh"
-								: "25vh",
+						: "25vh",
 				...(onClick && { cursor: "pointer" }),
 			}}
 			onClick={onClick ?? undefined}
