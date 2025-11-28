@@ -70,7 +70,7 @@ export const NavigationCard = ({
 							onFocus={() => setIsFocused(true)}
 							onBlur={() => setIsFocused(false)}
 							aria-label="搜索文章"
-							className={`h-auto rounded-none border-0 !bg-transparent px-0 py-3 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-300 ${
+							className={`h-auto rounded-none border-0 bg-transparent px-0 py-3 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 transition-all duration-300 ${
 								isFocused ? "text-xl border-b-2" : "text-2xl border-b-0"
 							} ${
 								searchTerm && layoutRectangles.length === 0
