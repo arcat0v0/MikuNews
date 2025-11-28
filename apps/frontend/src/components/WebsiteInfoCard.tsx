@@ -22,7 +22,7 @@ export const WebsiteInfoCard = ({ importance = 4 }: WebsiteInfoCardProps) => {
 
 	return (
 		<div
-			className="group hover:opacity-90 transition-opacity duration-300 flex items-center justify-center p-6 relative overflow-hidden bg-white dark:bg-black"
+			className="group transition-opacity duration-300 flex items-center justify-center p-6 relative overflow-hidden bg-white dark:bg-black"
 			style={{
 				gridColumn: `span ${colSpan}`,
 				gridRow: `span ${rowSpan}`,
@@ -58,9 +58,7 @@ export const WebsiteInfoCard = ({ importance = 4 }: WebsiteInfoCardProps) => {
 
 					{/* 在较大的卡片中显示更多信息 */}
 					{(importance === 0 || importance === 1 || importance === 3) && (
-						<div
-							className="text-[10px] text-gray-800/60 dark:text-white/60 pt-2 space-y-1 border-t border-gray-500/20 mt-2"
-						>
+						<div className="text-[10px] text-gray-800/60 dark:text-white/60 pt-2 space-y-1 border-t border-gray-500/20 mt-2">
 							<p>All rights reserved.</p>
 							<p>Powered by React & Vite</p>
 						</div>
