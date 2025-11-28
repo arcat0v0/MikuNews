@@ -22,17 +22,17 @@ function getColSpan(importance: 0 | 1 | 2 | 3 | 4 = 4): number {
 }
 
 /**
- * 根据重要程度获取占用的网格面积 (1x1单位)
+ * 根据重要程度获取占用的行数
  */
-function getArea(importance: 0 | 1 | 2 | 3 | 4 = 4): number {
-	const areaMap = {
-		0: 8, // 4x2 = 8
-		1: 4, // 2x2 = 4
-		2: 2, // 2x1 = 2
-		3: 2, // 1x2 = 2
-		4: 1, // 1x1 = 1
+function getRowSpan(importance: 0 | 1 | 2 | 3 | 4 = 4): number {
+	const rowSpanMap = {
+		0: 2, // 整行，高一半
+		1: 2, // 宽高各占一半
+		2: 1, // 宽一半，高1/4
+		3: 2, // 宽1/4，高一半
+		4: 1, // 各占1/4
 	};
-	return areaMap[importance];
+	return rowSpanMap[importance];
 }
 
 /**
@@ -79,13 +79,7 @@ function createWelcomeCard(): LayoutItem {
 /**
  * 自动布局算法
  * 根据重要级别重新排序数组，确保每行横向占满4列
- * 自动在末尾添加网站信息卡片填充空隙
- *
- * 布局规则（4列网格）：
- * - importance=1 (2x2): 占2列，后面需要再2列 -> 可跟 1/2/33/44
- * - importance=2 (2x1): 占2列，后面需要再2列 -> 可跟 1/2/33/44
- * - importance=3 (1x2): 占1列，后面需要再3列 -> 可跟 3(+需要2列)/44(+需要1列)
- * - importance=4 (1x1): 占1列，后面需要再3列 -> 可跟 4(+需要2列)
+ * 自动在末尾添加网站信息卡片填充空隙，确保位于右下角
  *
  * @param rectangles 待布局的矩形数组
  * @returns 优化排序后的矩形数组（包含网站信息卡片）
@@ -130,56 +124,174 @@ export function autoLayout(rectangles: RectangleProps[]): LayoutItem[] {
 		}
 	}
 
-	// 4. 检查剩余空间并填充
-	// 使用面积计算而不是仅列宽，因为不同importance高度不同
-	const totalArea = result.reduce((sum, item) => {
-		const area = getArea(item.importance);
-		return sum + area;
-	}, 0);
-
-	// 常规逻辑
-	// 每一行满是4个单位面积 (宽4 x 高1)
-	// 我们需要总面积是4的倍数以形成矩形块
-	const remainder = totalArea % 4;
-	const neededArea = remainder === 0 ? 0 : 4 - remainder;
-
-	// 尝试添加一个网站信息卡片看看是否能填满
-	// 如果 neededArea > 0，我们尝试找到一个网站卡片填满它
-	// 如果 neededArea === 0，说明当前已经满了，需要另起一行，加一个importance=1 (area=4) 的卡片
-
-	if (neededArea === 0) {
-		// 刚好填满，需要另起一行
-		// 使用 importance=0 (4x2, 整行) 的网站信息卡片
-		result.push(createWebsiteInfoCard(0));
-	} else {
-		// 根据需要的面积选择合适的卡片组合
-		// 优先使用网站信息卡片填满
-		const fillerCards = selectFillerCardsByArea(neededArea);
-		result.push(...fillerCards);
-	}
+	// 5. 模拟 Grid 布局，填充空卡片直到 InfoCard 能位于右下角
+	fillHolesAndAddInfoCard(result);
 
 	return result;
 }
 
 /**
- * 根据需要的面积选择合适的卡片组合
- * @param neededArea 需要填充的面积
- * @returns 卡片数组
+ * 模拟 Grid 布局并填充空卡片
  */
-function selectFillerCardsByArea(neededArea: number): LayoutItem[] {
-	switch (neededArea) {
-		case 1:
-			// 需要面积1：使用1个 importance=4 (1x1) 的网站信息卡片
-			return [createWebsiteInfoCard(4)];
-		case 2:
-			// 需要面积2：使用1个 importance=2 (2x1) 的网站信息卡片
-			return [createWebsiteInfoCard(2)];
-		case 3:
-			// 需要面积3：使用1个 importance=4 (1x1) 的空卡片 + 1个 importance=2 (2x1) 的网站信息卡片
-			// 先添加空卡片，再添加网站信息卡片
-			return [createEmptyCard(4), createWebsiteInfoCard(2)];
-		default:
-			return [];
+function fillHolesAndAddInfoCard(items: LayoutItem[]) {
+	const occupied = new Set<string>();
+	let cursor = { r: 0, c: 0 };
+
+	// 辅助函数：检查位置是否可用
+	const checkFit = (r: number, c: number, w: number, h: number) => {
+		if (c + w > 4) return false;
+		for (let i = 0; i < h; i++) {
+			for (let j = 0; j < w; j++) {
+				if (occupied.has(`${r + i},${c + j}`)) return false;
+			}
+		}
+		return true;
+	};
+
+	// 辅助函数：标记占用
+	const markOccupied = (r: number, c: number, w: number, h: number) => {
+		for (let i = 0; i < h; i++) {
+			for (let j = 0; j < w; j++) {
+				occupied.add(`${r + i},${c + j}`);
+			}
+		}
+	};
+
+	// 辅助函数：移动光标到下一个格子
+	const advanceCursor = () => {
+		cursor.c++;
+		if (cursor.c >= 4) {
+			cursor.c = 0;
+			cursor.r++;
+		}
+	};
+
+	// 模拟放置一个 item
+	// 返回放置的位置 {r, c}
+	const placeItem = (item: LayoutItem) => {
+		const w = getColSpan(item.importance);
+		const h = getRowSpan(item.importance);
+
+		while (true) {
+			// 检查当前光标位置是否可用
+			if (checkFit(cursor.r, cursor.c, w, h)) {
+				// 放置
+				const pos = { ...cursor };
+				markOccupied(pos.r, pos.c, w, h);
+				// 光标不需要跳过整个 item，只需要在这个 item 之后继续寻找？
+				// 不，Grid 算法在放置 item 后，光标会继续向前。
+				// 这里我们简单地让光标前进一格，下次循环会检查占用情况。
+				// 但是为了效率，我们可以直接让光标跳到 item 的右边？
+				// 不建议，因为 item 可能是 2x2，右边 (r, c+2) 可能是空的，但下面 (r+1, c) 被占用了。
+				// 最安全的模拟是逐格扫描。
+
+				// 放置成功后，我们需要把光标移到这个 item 的"下一个"位置吗？
+				// 标准 Grid 自动放置：光标更新为 item 之后的那个 slot。
+				// 也就是 cursor.c += w。如果不换行的话。
+				// 如果换行了，就得处理。
+				// 简单处理：放置后，我们不强制移动光标，而是让下一次 `placeItem` 自己去找空位。
+				// 但是 `placeItem` 是从当前的 `cursor` 开始找的。
+				// 如果我们不更新 `cursor`，下一次 `placeItem` 可能会试图放在同一个位置（然后发现 checkFit 失败）。
+				// 所以放置后，至少要 advanceCursor 一次？
+				// 或者更准确地，cursor 应该移到 item 的右侧。
+				// 例如 item 在 (0,0) 占 2x1。 cursor 应该变 (0,2)。
+				// 如果 item 在 (0,2) 占 2x1。 cursor 应该变 (0,4) -> (1,0)。
+				// 但是请注意，我们是模拟 sequential placement。
+				// 所以放置后，更新 cursor 到 item 后面是合理的。
+
+				// 更新 cursor
+				// 注意：如果 item 跨多行，光标只在当前行移动？
+				// MDN: "The auto-placement cursor is updated to the grid slot following the item's column span."
+				let nextC = pos.c + w;
+				let nextR = pos.r;
+				if (nextC >= 4) {
+					nextC = 0;
+					nextR++;
+				}
+				cursor = { r: nextR, c: nextC };
+
+				return pos;
+			}
+			advanceCursor();
+		}
+	};
+
+	// 1. 模拟现有 items
+	for (const item of items) {
+		placeItem(item);
+	}
+
+	// 2. 尝试添加 InfoCard
+	// 我们的目标是让 InfoCard 位于右下角
+	// 优先使用 importance=2 (2x1) 的卡片，如果它能占据最后两列 (Col 2, 3)
+	// 否则使用 importance=4 (1x1) 的卡片，如果它能占据最后一列 (Col 3)
+	// 如果都不能满足，就填充一个 EmptyCard (1x1)，然后继续尝试
+
+	const infoCard2 = createWebsiteInfoCard(2); // 2x1
+	const infoCard4 = createWebsiteInfoCard(4); // 1x1
+
+	// 辅助函数：尝试放置 item，不修改状态
+	const tryPlaceItem = (item: LayoutItem): { r: number; c: number } | null => {
+		const w = getColSpan(item.importance);
+		const h = getRowSpan(item.importance);
+
+		// 从当前 cursor 开始尝试
+		// 为了不影响主逻辑的 cursor，我们需要一个临时的游标模拟寻找过程
+		// 但是这会比较复杂，因为 checkFit 依赖 cursor。
+		// 更好的方法是：保存当前 cursor，尝试 placeItem (它会修改 cursor 和 advance)，
+		// 如果不满意，我们需要回滚状态？occupied 是 Set，比较难回滚。
+
+		// 重新设计逻辑：
+		// 我们的 checkFit 只是检查某点是否可用，并不修改 cursor。
+		// 我们可以在不修改 occupied 的情况下，用 tempCursor 模拟 placeItem 的寻找过程。
+
+		let tempCursor = { ...cursor };
+
+		// 防止无限循环寻找
+		let attempts = 0;
+		while (attempts < 100) {
+			// 找100次足够了，找不到就是真的满了或者需要换行很多次
+			if (checkFit(tempCursor.r, tempCursor.c, w, h)) {
+				return { ...tempCursor };
+			}
+
+			// advance tempCursor
+			tempCursor.c++;
+			if (tempCursor.c >= 4) {
+				tempCursor.c = 0;
+				tempCursor.r++;
+			}
+			attempts++;
+		}
+		return null;
+	};
+
+	let safetyCount = 0;
+	while (safetyCount < 20) {
+		// 1. 尝试放 InfoCard(2)
+		// 如果放在了 col 2 (意味着占据 2,3)，则是完美的
+		const pos2 = tryPlaceItem(infoCard2);
+		if (pos2 && pos2.c === 2) {
+			placeItem(infoCard2); // 真正放置
+			items.push(infoCard2);
+			break;
+		}
+
+		// 2. 尝试放 InfoCard(4)
+		// 如果放在了 col 3 (意味着占据 3)，也是可以的
+		const pos4 = tryPlaceItem(infoCard4);
+		if (pos4 && pos4.c === 3) {
+			placeItem(infoCard4); // 真正放置
+			items.push(infoCard4);
+			break;
+		}
+
+		// 3. 都不满足条件，填充 EmptyCard(4) 以推进光标
+		const empty = createEmptyCard(4);
+		placeItem(empty); // 真正放置，更新 cursor 和 occupied
+		items.push(empty);
+
+		safetyCount++;
 	}
 }
 

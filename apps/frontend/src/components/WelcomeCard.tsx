@@ -13,7 +13,6 @@ const fontUrl = "/fonts/ZiHunBianTaoTi/ZiHunBianTaoTi-2.ttf";
 
 export const WelcomeCard = () => {
 	const isDarkMode = useThemeStore((state) => state.isDarkMode);
-	const bgColor = !isDarkMode ? "#000000" : "#FFFFFF";
 
 	// 动态加载自定义字体
 	const style = document.createElement("style");
@@ -32,17 +31,17 @@ export const WelcomeCard = () => {
 
 	return (
 		<div
-			className="flex items-center justify-center p-6 relative overflow-hidden"
+			className="flex items-center justify-center p-6 relative overflow-hidden bg-white dark:bg-black"
 			style={{
-				backgroundColor: bgColor,
 				gridColumn: "span 2",
 				gridRow: "span 1",
 				height: "25vh",
 			}}
+			data-dark-mode={isDarkMode ? "true" : "false"}
 		>
 			<MorphingText
 				texts={welcomeTexts}
-				className={`h-10 text-[24pt] md:h-12 lg:text-[32pt] font-[DeYiHei,sans-serif] ${!isDarkMode ? "text-white" : "text-gray-900"}`}
+				className="h-10 text-[24pt] md:h-12 lg:text-[32pt] font-[DeYiHei,sans-serif] text-gray-900 dark:text-white"
 			/>
 		</div>
 	);
