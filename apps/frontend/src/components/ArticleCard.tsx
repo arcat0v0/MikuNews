@@ -1,7 +1,8 @@
 import ReactMarkdown from "react-markdown";
+import type { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
-import { User } from "lucide-react";
+import { ExternalLink, User } from "lucide-react";
 import { formatTimestamp } from "../utils/dateFormatter";
 import { MediaGallery } from "./MediaGallery";
 import type { MediaItem } from "../utils/articleParser";
@@ -14,6 +15,20 @@ export interface ArticleCardProps {
 	gallery?: MediaItem[];
 	className?: string;
 }
+
+const markdownComponents: Components = {
+	a: ({ node: _node, className, children, ...props }) => (
+		<a
+			{...props}
+			target="_blank"
+			rel="noopener noreferrer"
+			className={`inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 underline hover:text-blue-700 dark:hover:text-blue-300 ${className ?? ""}`.trim()}
+		>
+			<span>{children}</span>
+			<ExternalLink className="h-4 w-4" aria-hidden />
+		</a>
+	),
+};
 
 export const ArticleCard = ({
 	content,
@@ -89,7 +104,7 @@ export const ArticleCard = ({
 							prose-h2:text-3xl prose-h2:mb-6 prose-h2:mt-10
 							prose-h3:text-2xl prose-h3:mb-4 prose-h3:mt-8
 							prose-p:mb-6 prose-p:leading-relaxed
-							prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline
+							prose-a:text-blue-600 dark:prose-a:text-blue-400
 							prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded
 							prose-pre:bg-gray-100 dark:prose-pre:bg-gray-800 prose-pre:p-4 prose-pre:rounded-lg prose-pre:mb-6
 							prose-blockquote:border-l-4 prose-blockquote:border-gray-300 dark:prose-blockquote:border-gray-600 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:my-6
@@ -105,6 +120,7 @@ export const ArticleCard = ({
 						<ReactMarkdown
 							remarkPlugins={[remarkGfm]}
 							rehypePlugins={[rehypeRaw]}
+							components={markdownComponents}
 						>
 							{content}
 						</ReactMarkdown>
