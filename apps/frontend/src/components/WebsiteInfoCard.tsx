@@ -1,12 +1,13 @@
+import { useThemeStore } from "../store/themeStore";
+
 export interface WebsiteInfoCardProps {
 	importance?: 0 | 1 | 2 | 3 | 4; // 重要程度：0=整行宽高一半, 1=宽高各占一半, 2=宽一半高1/4, 3=宽1/4高一半, 4=各占1/4
-	isDarkMode?: boolean; // 是否暗黑模式
 }
 
 export const WebsiteInfoCard = ({
 	importance = 4,
-	isDarkMode = false,
 }: WebsiteInfoCardProps) => {
+	const isDarkMode = useThemeStore((state) => state.isDarkMode);
 	// 根据重要程度计算 colSpan 和 rowSpan
 	const getSpanFromImportance = (imp: 0 | 1 | 2 | 3 | 4) => {
 		const spanMap = {
@@ -25,7 +26,6 @@ export const WebsiteInfoCard = ({
 	const bgColor = isDarkMode ? "#000000" : "#FFFFFF";
 	const textColor = isDarkMode ? "text-white/90" : "text-gray-900/90";
 	const descColor = isDarkMode ? "text-white/60" : "text-gray-800/60";
-
 	return (
 		<div
 			className="group hover:opacity-90 transition-opacity duration-300 flex items-center justify-center p-6 relative overflow-hidden"

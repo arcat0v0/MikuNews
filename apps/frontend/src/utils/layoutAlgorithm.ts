@@ -4,6 +4,7 @@ import type { RectangleProps } from "../components/Rectangle";
 export interface LayoutItem extends RectangleProps {
 	isWebsiteInfo?: boolean; // 标识是否为网站信息卡片
 	isEmpty?: boolean; // 标识是否为填充用的空卡片
+	isWelcome?: boolean; // 标识是否为欢迎卡片
 }
 
 /**
@@ -63,6 +64,19 @@ function createEmptyCard(importance: 0 | 1 | 2 | 3 | 4): LayoutItem {
 }
 
 /**
+ * 创建欢迎卡片
+ * @returns 欢迎卡片对象
+ */
+function createWelcomeCard(): LayoutItem {
+	return {
+		importance: 2,
+		color: "#FFFFFF",
+		title: "",
+		isWelcome: true,
+	};
+}
+
+/**
  * 自动布局算法
  * 根据重要级别重新排序数组，确保每行横向占满4列
  * 自动在末尾添加网站信息卡片填充空隙
@@ -96,7 +110,10 @@ export function autoLayout(rectangles: RectangleProps[]): LayoutItem[] {
 		sorted.unshift(item);
 	}
 
-	// 3. 根据布局规则重新排序
+	// 3. 在第二个位置插入欢迎卡片
+	sorted.splice(1, 0, createWelcomeCard());
+
+	// 4. 根据布局规则重新排序
 	const result: LayoutItem[] = [];
 	const remaining = [...sorted];
 

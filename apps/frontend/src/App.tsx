@@ -1,6 +1,7 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { Rectangle, type RectangleProps } from "./components/Rectangle";
 import { WebsiteInfoCard } from "./components/WebsiteInfoCard";
+import { WelcomeCard } from "./components/WelcomeCard";
 import { ArticleModal } from "./components/ArticleModal";
 import { loadArticlesAsRectangles } from "./utils/articleParser";
 import { autoLayout, type LayoutItem } from "./utils/layoutAlgorithm";
@@ -19,23 +20,6 @@ function App() {
 		gallery?: MediaItem[];
 		originRect: DOMRect | null;
 	} | null>(null);
-
-	// 检测暗黑模式
-	const [isDarkMode, setIsDarkMode] = useState(false);
-
-	useEffect(() => {
-		// 初始检测
-		const darkModeMediaQuery = window.matchMedia(
-			"(prefers-color-scheme: dark)",
-		);
-		setIsDarkMode(darkModeMediaQuery.matches);
-
-		// 监听变化
-		const handler = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
-		darkModeMediaQuery.addEventListener("change", handler);
-
-		return () => darkModeMediaQuery.removeEventListener("change", handler);
-	}, []);
 
 	// 使用布局算法自动排序
 	const rectangles = useMemo(() => {
@@ -61,8 +45,10 @@ function App() {
 							<WebsiteInfoCard
 								key="website-info"
 								importance={rect.importance}
-								isDarkMode={isDarkMode}
 							/>
+						) : rect.isWelcome ? (
+							// 渲染欢迎卡片
+							<WelcomeCard key="welcome-card" />
 						) : (
 							// 渲染普通文章卡片
 							<Rectangle
