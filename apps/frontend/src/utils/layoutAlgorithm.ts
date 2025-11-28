@@ -1,10 +1,17 @@
 import type { RectangleProps } from "../components/Rectangle";
 
 // 扩展接口以支持网站信息卡片标识
+export interface NavigationButton {
+	label: string;
+	href: string;
+}
+
 export interface LayoutItem extends RectangleProps {
 	isWebsiteInfo?: boolean; // 标识是否为网站信息卡片
 	isEmpty?: boolean; // 标识是否为填充用的空卡片
 	isWelcome?: boolean; // 标识是否为欢迎卡片
+	isNavigation?: boolean; // 标识是否为导航卡片
+	navigationButtons?: NavigationButton[]; // 导航按钮列表
 }
 
 /**
@@ -77,6 +84,23 @@ function createWelcomeCard(): LayoutItem {
 }
 
 /**
+ * 创建导航卡片
+ * @returns 导航卡片对象
+ */
+function createNavigationCard(): LayoutItem {
+	return {
+		importance: 2,
+		color: "#FFFFFF",
+		title: "导航卡片",
+		isNavigation: true,
+		navigationButtons: [
+			{ label: "资讯", href: "/news" },
+			{ label: "美图", href: "/gallery" },
+		],
+	};
+}
+
+/**
  * 自动布局算法
  * 根据重要级别重新排序数组，确保每行横向占满4列
  * 自动在末尾添加网站信息卡片填充空隙，确保位于右下角
@@ -107,7 +131,10 @@ export function autoLayout(rectangles: RectangleProps[]): LayoutItem[] {
 	// 3. 在第二个位置插入欢迎卡片
 	sorted.splice(1, 0, createWelcomeCard());
 
-	// 4. 根据布局规则重新排序
+	// 4. 在第三个位置插入导航卡片
+	sorted.splice(2, 0, createNavigationCard());
+
+	// 5. 根据布局规则重新排序
 	const result: LayoutItem[] = [];
 	const remaining = [...sorted];
 
@@ -124,7 +151,7 @@ export function autoLayout(rectangles: RectangleProps[]): LayoutItem[] {
 		}
 	}
 
-	// 5. 模拟 Grid 布局，填充空卡片直到 InfoCard 能位于右下角
+	// 6. 模拟 Grid 布局，填充空卡片直到 InfoCard 能位于右下角
 	fillHolesAndAddInfoCard(result);
 
 	return result;
