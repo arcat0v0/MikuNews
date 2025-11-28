@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import type { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -30,7 +31,7 @@ const markdownComponents: Components = {
 	),
 };
 
-export const ArticleCard = ({
+const ArticleCardComponent = ({
 	content,
 	title,
 	author,
@@ -39,6 +40,12 @@ export const ArticleCard = ({
 	className = "",
 }: ArticleCardProps) => {
 	const hasGallery = gallery && gallery.length > 0;
+
+	// 缓存格式化的时间戳
+	const formattedTime = useMemo(
+		() => (timestamp ? formatTimestamp(timestamp) : null),
+		[timestamp]
+	);
 
 	return (
 		<article
@@ -127,10 +134,10 @@ export const ArticleCard = ({
 					</div>
 
 					{/* 时间信息 - 右下角 */}
-					{timestamp && (
+					{formattedTime && (
 						<div className="mt-8 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
 							<time className="text-sm text-gray-500 dark:text-gray-400">
-								{formatTimestamp(timestamp)}
+								{formattedTime}
 							</time>
 						</div>
 					)}
@@ -139,3 +146,6 @@ export const ArticleCard = ({
 		</article>
 	);
 };
+
+// 使用 memo 优化组件
+export const ArticleCard = memo(ArticleCardComponent);

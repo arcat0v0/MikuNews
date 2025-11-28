@@ -1,24 +1,29 @@
+import { memo, useMemo } from "react";
 import { useThemeStore } from "../store/themeStore";
 
 export interface WebsiteInfoCardProps {
 	importance?: 0 | 1 | 2 | 3 | 4; // 重要程度：0=整行宽高一半, 1=宽高各占一半, 2=宽一半高1/4, 3=宽1/4高一半, 4=各占1/4
 }
 
-export const WebsiteInfoCard = ({ importance = 4 }: WebsiteInfoCardProps) => {
-	const isDarkMode = useThemeStore((state) => state.isDarkMode);
-	// 根据重要程度计算 colSpan 和 rowSpan
-	const getSpanFromImportance = (imp: 0 | 1 | 2 | 3 | 4) => {
-		const spanMap = {
-			0: { colSpan: 4, rowSpan: 2 }, // 整行，高一半
-			1: { colSpan: 2, rowSpan: 2 }, // 宽高各占一半
-			2: { colSpan: 2, rowSpan: 1 }, // 宽一半，高1/4
-			3: { colSpan: 1, rowSpan: 2 }, // 宽1/4，高一半
-			4: { colSpan: 1, rowSpan: 1 }, // 各占1/4
-		};
-		return spanMap[imp];
+// 提取到组件外部
+const getSpanFromImportance = (imp: 0 | 1 | 2 | 3 | 4) => {
+	const spanMap = {
+		0: { colSpan: 4, rowSpan: 2 }, // 整行，高一半
+		1: { colSpan: 2, rowSpan: 2 }, // 宽高各占一半
+		2: { colSpan: 2, rowSpan: 1 }, // 宽一半，高1/4
+		3: { colSpan: 1, rowSpan: 2 }, // 宽1/4，高一半
+		4: { colSpan: 1, rowSpan: 1 }, // 各占1/4
 	};
+	return spanMap[imp];
+};
 
-	const { colSpan, rowSpan } = getSpanFromImportance(importance);
+const WebsiteInfoCardComponent = ({ importance = 4 }: WebsiteInfoCardProps) => {
+	const isDarkMode = useThemeStore((state) => state.isDarkMode);
+
+	const { colSpan, rowSpan } = useMemo(
+		() => getSpanFromImportance(importance),
+		[importance]
+	);
 
 	return (
 		<div
@@ -68,3 +73,6 @@ export const WebsiteInfoCard = ({ importance = 4 }: WebsiteInfoCardProps) => {
 		</div>
 	);
 };
+
+// 使用 memo 优化组件
+export const WebsiteInfoCard = memo(WebsiteInfoCardComponent);

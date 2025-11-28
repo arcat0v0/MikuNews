@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import { formatTimestamp } from "../utils/dateFormatter";
 import { useModalStore } from "../store/modalStore";
 import type { MediaItem } from "../utils/articleParser";
@@ -22,7 +23,19 @@ export interface RectangleProps {
 	isEmpty?: boolean; // 是否为空卡片
 }
 
-export const Rectangle = ({
+// 提取 span 计算到组件外部，避免每次渲染都创建新函数
+const getSpanFromImportance = (imp: 0 | 1 | 2 | 3 | 4) => {
+	const spanMap = {
+		0: { colSpan: 4, rowSpan: 2 }, // 整行，高一半
+		1: { colSpan: 2, rowSpan: 2 }, // 宽高各占一半
+		2: { colSpan: 2, rowSpan: 1 }, // 宽一半，高1/4
+		3: { colSpan: 1, rowSpan: 2 }, // 宽1/4，高一半
+		4: { colSpan: 1, rowSpan: 1 }, // 各占1/4
+	};
+	return spanMap[imp];
+};
+
+const RectangleComponent = ({
 	importance = 4,
 	color,
 	title,
@@ -58,19 +71,11 @@ export const Rectangle = ({
 			});
 		}
 	};
-	// 根据重要程度计算 colSpan 和 rowSpan
-	const getSpanFromImportance = (imp: 0 | 1 | 2 | 3 | 4) => {
-		const spanMap = {
-			0: { colSpan: 4, rowSpan: 2 }, // 整行，高一半
-			1: { colSpan: 2, rowSpan: 2 }, // 宽高各占一半
-			2: { colSpan: 2, rowSpan: 1 }, // 宽一半，高1/4
-			3: { colSpan: 1, rowSpan: 2 }, // 宽1/4，高一半
-			4: { colSpan: 1, rowSpan: 1 }, // 各占1/4
-		};
-		return spanMap[imp];
-	};
 
-	const { colSpan, rowSpan } = getSpanFromImportance(importance);
+	const { colSpan, rowSpan } = useMemo(
+		() => getSpanFromImportance(importance),
+		[importance]
+	);
 
 	// 如果是空卡片，直接渲染纯黑背景
 	if (isEmpty) {
@@ -106,9 +111,23 @@ export const Rectangle = ({
 		}
 	}
 
-	const useFontFamily = fontFamily || "DeYiHei, sans-serif";
-	const titleColor = textColor || "text-gray-900/70";
-	const descColor = descriptionColor || textColor || "text-gray-800/50";
+	// 使用 useMemo 缓存计算结果
+	const useFontFamily = useMemo(
+		() => fontFamily || "DeYiHei, sans-serif",
+		[fontFamily]
+	);
+	const titleColor = useMemo(
+		() => textColor || "text-gray-900/70",
+		[textColor]
+	);
+	const descColor = useMemo(
+		() => descriptionColor || textColor || "text-gray-800/50",
+		[descriptionColor, textColor]
+	);
+	const formattedTime = useMemo(
+		() => (timestamp ? formatTimestamp(timestamp) : null),
+		[timestamp]
+	);
 
 	const hasClickHandler = !!content;
 
@@ -180,15 +199,18 @@ export const Rectangle = ({
 					</p>
 				)}
 				{/* 时间信息，使用系统默认字体 */}
-				{timestamp && (
+				{formattedTime && (
 					<p
 						className="text-base text-gray-600/70 group-hover:text-gray-700 transition-colors duration-300 mt-2"
 						style={{ fontFamily: "sans-serif" }}
 					>
-						{formatTimestamp(timestamp)}
+						{formattedTime}
 					</p>
 				)}
 			</div>
 		</div>
 	);
 };
+
+// 使用 memo 优化组件
+export const Rectangle = memo(RectangleComponent);

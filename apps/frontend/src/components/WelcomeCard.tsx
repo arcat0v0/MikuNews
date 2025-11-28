@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { MorphingText } from "./ui/morphing-text";
 import { useThemeStore } from "../store/themeStore";
 
@@ -11,7 +12,7 @@ const welcomeTexts = [
 const fontFamily = "ZiHunBianTaoTi";
 const fontUrl = "/fonts/ZiHunBianTaoTi/ZiHunBianTaoTi-2.ttf";
 
-export const WelcomeCard = () => {
+const WelcomeCardComponent = () => {
 	const isDarkMode = useThemeStore((state) => state.isDarkMode);
 
 	// 动态加载自定义字体
@@ -46,3 +47,6 @@ export const WelcomeCard = () => {
 		</div>
 	);
 };
+
+// 使用 memo 优化组件
+export const WelcomeCard = memo(WelcomeCardComponent);

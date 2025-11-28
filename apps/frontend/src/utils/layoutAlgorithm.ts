@@ -98,7 +98,12 @@ function createNavigationCard(): LayoutItem {
  * @returns 优化排序后的矩形数组（包含网站信息卡片）
  */
 export function autoLayout(rectangles: RectangleProps[]): LayoutItem[] {
-	// 1. 按时间戳排序作为基础优先级
+	// 空数组快速返回
+	if (rectangles.length === 0) {
+		return [];
+	}
+
+	// 1. 按时间戳排序作为基础优先级（只排序一次）
 	const sorted = [...rectangles].sort((a, b) => {
 		if (a.timestamp !== undefined && b.timestamp !== undefined) {
 			return b.timestamp - a.timestamp; // 降序，最新的在前
@@ -123,19 +128,18 @@ export function autoLayout(rectangles: RectangleProps[]): LayoutItem[] {
 	// 4. 在第三个位置插入导航卡片
 	sorted.splice(2, 0, createNavigationCard());
 
-	// 5. 根据布局规则重新排序
+	// 5. 根据布局规则重新排序（直接使用 sorted，避免复制）
 	const result: LayoutItem[] = [];
-	const remaining = [...sorted];
 
-	while (remaining.length > 0) {
+	while (sorted.length > 0) {
 		// 尝试构建完整的一行（4列）
-		const rowItems = buildCompleteRow(remaining);
+		const rowItems = buildCompleteRow(sorted);
 
 		if (rowItems.length > 0) {
 			result.push(...rowItems);
 		} else {
 			// 如果无法构建完整行，将所有剩余元素添加进去
-			result.push(...remaining);
+			result.push(...sorted);
 			break;
 		}
 	}

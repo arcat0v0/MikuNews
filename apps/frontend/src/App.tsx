@@ -8,6 +8,18 @@ import { ModalProvider } from "./components/ModalProvider";
 import { useArticleLayoutStore } from "./store/articleLayoutStore";
 import "./App.css";
 
+// 提取样式计算函数到组件外部
+const getGridStyle = (importance: 0 | 1 | 2 | 3 | 4 = 4) => {
+	const styleMap = {
+		0: { gridColumn: "span 4", gridRow: "span 2" },
+		1: { gridColumn: "span 2", gridRow: "span 2" },
+		2: { gridColumn: "span 2", gridRow: "span 1" },
+		3: { gridColumn: "span 1", gridRow: "span 2" },
+		4: { gridColumn: "span 1", gridRow: "span 1" },
+	};
+	return styleMap[importance];
+};
+
 function App() {
 	const layoutRectangles = useArticleLayoutStore(
 		(state) => state.layoutRectangles,
@@ -45,6 +57,7 @@ function App() {
 		return () => container.removeEventListener("wheel", handleWheel);
 	}, []);
 
+	// 修复依赖问题：当布局变化时重新计算最大滚动距离
 	useEffect(() => {
 		const container = scrollContainerRef.current;
 		if (!container) return;
@@ -86,13 +99,9 @@ function App() {
 									key={
 										rect.id ?? rect.slug ?? `rectangle-${index}-${rect.title}`
 									}
-									layout
 									exit={{ opacity: 0, scale: 0.8 }}
-									transition={{ duration: 0.3 }}
-									style={{
-										gridColumn: `span ${rect.importance === 1 ? 2 : rect.importance === 2 ? 2 : rect.importance === 3 ? 1 : rect.importance === 4 ? 1 : 4}`,
-										gridRow: `span ${rect.importance === 1 ? 2 : rect.importance === 2 ? 1 : rect.importance === 3 ? 2 : rect.importance === 4 ? 1 : 2}`,
-									}}
+									transition={{ duration: 0.2 }}
+									style={getGridStyle(rect.importance)}
 									id={
 										rect.id
 											? `article-${rect.id}`

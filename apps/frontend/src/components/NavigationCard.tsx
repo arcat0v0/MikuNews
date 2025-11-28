@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type ComponentProps } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { useThemeStore } from "../store/themeStore";
 import { useArticleLayoutStore } from "../store/articleLayoutStore";
@@ -25,7 +25,7 @@ interface NavigationButtonItemProps {
 	aboutButtonRef?: React.RefObject<HTMLButtonElement | null>;
 }
 
-const NavigationButtonItem = ({
+const NavigationButtonItem = memo(({
 	button,
 	onAboutClick,
 	aboutButtonRef,
@@ -54,7 +54,7 @@ const NavigationButtonItem = ({
 			{button.label}
 		</a>
 	);
-};
+});
 
 export interface NavigationCardProps {
 	importance?: 0 | 1 | 2 | 3 | 4; // 重要程度：0=整行宽高一半, 1=宽高各占一半, 2=宽一半高1/4, 3=宽1/4高一半, 4=各占1/4
@@ -72,7 +72,7 @@ const getSpanFromImportance = (imp: 0 | 1 | 2 | 3 | 4) => {
 	return spanMap[imp];
 };
 
-export const NavigationCard = ({
+const NavigationCardComponent = ({
 	importance = 2,
 	buttons,
 }: NavigationCardProps) => {
@@ -94,15 +94,17 @@ export const NavigationCard = ({
 	const aboutButtonRef = useRef<HTMLButtonElement>(null);
 	const navigationButtons = buttons ?? NAVIGATION_BUTTONS;
 
+	// 优化后的防抖逻辑：使用单个 setTimeout
 	useEffect(() => {
+		setIsSearching(true);
 		const timer = setTimeout(() => {
-			setIsSearching(true);
-			setTimeout(() => {
-				setSearchTerm(inputValue);
-				setTimeout(() => setIsSearching(false), 300);
-			}, 300);
+			setSearchTerm(inputValue);
+			setIsSearching(false);
 		}, 500);
-		return () => clearTimeout(timer);
+		return () => {
+			clearTimeout(timer);
+			setIsSearching(false);
+		};
 	}, [inputValue, setSearchTerm]);
 
 	useEffect(() => {
@@ -205,3 +207,6 @@ export const NavigationCard = ({
 		</div>
 	);
 };
+
+// 使用 memo 优化组件
+export const NavigationCard = memo(NavigationCardComponent);
