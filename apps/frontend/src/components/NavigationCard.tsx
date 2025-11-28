@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, type ComponentProps } from "react";
+import { useLocation, useNavigate } from "react-router";
 import { useThemeStore } from "../store/themeStore";
 import { useArticleLayoutStore } from "../store/articleLayoutStore";
 import { Input } from "./ui/input";
@@ -75,6 +76,8 @@ export const NavigationCard = ({
 	importance = 2,
 	buttons,
 }: NavigationCardProps) => {
+	const location = useLocation();
+	const navigate = useNavigate();
 	const isDarkMode = useThemeStore((state) => state.isDarkMode);
 	const searchTerm = useArticleLayoutStore((state) => state.searchTerm);
 	const setSearchTerm = useArticleLayoutStore((state) => state.setSearchTerm);
@@ -101,6 +104,31 @@ export const NavigationCard = ({
 		}, 500);
 		return () => clearTimeout(timer);
 	}, [inputValue, setSearchTerm]);
+
+	useEffect(() => {
+		if (location.pathname === "/about") {
+			setIsAboutModalOpen(true);
+		} else if (isAboutModalOpen || aboutButtonRect) {
+			setIsAboutModalOpen(false);
+			setAboutButtonRect(null);
+		}
+	}, [aboutButtonRect, isAboutModalOpen, location.pathname]);
+
+	const openAboutCard = (rect: DOMRect | null) => {
+		setAboutButtonRect(rect);
+		setIsAboutModalOpen(true);
+		if (location.pathname !== "/about") {
+			navigate("/about", { replace: true });
+		}
+	};
+
+	const closeAboutCard = () => {
+		setIsAboutModalOpen(false);
+		setAboutButtonRect(null);
+		if (location.pathname === "/about") {
+			navigate("/", { replace: true });
+		}
+	};
 
 	return (
 		<div
@@ -161,8 +189,7 @@ export const NavigationCard = ({
 							key={`${btn.label}-${btn.href}`}
 							button={btn}
 							onAboutClick={(rect) => {
-								setAboutButtonRect(rect);
-								setIsAboutModalOpen(true);
+								openAboutCard(rect);
 							}}
 							aboutButtonRef={aboutButtonRef}
 						/>
@@ -171,7 +198,7 @@ export const NavigationCard = ({
 
 				<AboutModal
 					isOpen={isAboutModalOpen}
-					onClose={() => setIsAboutModalOpen(false)}
+					onClose={closeAboutCard}
 					originRect={aboutButtonRect}
 				/>
 			</div>

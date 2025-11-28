@@ -5,14 +5,20 @@ import App from "./App.tsx";
 import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 
+const createAppElement = () => (
+	<StrictMode>
+		<App />
+	</StrictMode>
+);
+
 const router = createBrowserRouter([
 	{
+		path: "/about",
+		element: createAppElement(),
+	},
+	{
 		path: "/:articleId?",
-		element: (
-			<StrictMode>
-				<App />
-			</StrictMode>
-		),
+		element: createAppElement(),
 	},
 ]);
 
