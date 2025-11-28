@@ -16,6 +16,7 @@ export interface RectangleProps {
 	author?: string; // 作者名称
 	content?: string; // Markdown 文章内容
 	slug?: string; // 文章唯一标识
+	id?: string; // 文章 ID
 	gallery?: MediaItem[]; // 媒体画廊
 	onClick?: (e: React.MouseEvent<HTMLDivElement>) => void; // 点击事件处理器
 	isEmpty?: boolean; // 是否为空卡片
@@ -35,6 +36,7 @@ export const Rectangle = ({
 	timestamp,
 	content: _content, // 保留用于传递，但组件本身不使用
 	slug: _slug, // 保留用于传递，但组件本身不使用
+	id: _id, // 保留用于传递，但组件本身不使用
 	onClick,
 	isEmpty,
 }: RectangleProps) => {

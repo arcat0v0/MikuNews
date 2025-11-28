@@ -17,11 +17,13 @@ export interface ArticleFrontMatter {
 	timestamp: number;
 	author?: string;
 	gallery?: MediaItem[]; // 媒体画廊
+	id?: string; // 可选的文章标识
 }
 
 export interface Article extends ArticleFrontMatter {
 	content: string;
 	slug: string;
+	id: string;
 }
 
 /**
@@ -61,6 +63,10 @@ export function parseArticle(markdown: string, slug: string): Article | null {
 			gallery: data.gallery,
 			content: content.trim(),
 			slug,
+			id:
+				typeof data.id === "string" && data.id.trim().length > 0
+					? data.id.trim()
+					: slug,
 		};
 	} catch (error) {
 		console.error(`Failed to parse article ${slug}:`, error);
@@ -83,6 +89,7 @@ export function articleToRectangle(article: Article): RectangleProps {
 		gallery: article.gallery,
 		content: article.content,
 		slug: article.slug,
+		id: article.id,
 	};
 }
 
