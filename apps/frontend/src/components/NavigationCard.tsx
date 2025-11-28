@@ -1,12 +1,63 @@
+import { useState, useEffect, useRef, type ComponentProps } from "react";
 import { useThemeStore } from "../store/themeStore";
 import { useArticleLayoutStore } from "../store/articleLayoutStore";
-import type { NavigationButton } from "../utils/layoutAlgorithm";
 import { Input } from "./ui/input";
-import { useState, useEffect } from "react";
+import { AboutModal } from "./AboutModal";
+
+type NavigationButton = {
+	label: string;
+	href: string;
+};
+
+const NAVIGATION_BUTTONS: NavigationButton[] = [
+	{ label: "资讯", href: "/news" },
+	{ label: "美图", href: "/gallery" },
+	{ label: "关于", href: "/about" },
+];
+
+const buttonClassName =
+	"px-5 py-2 rounded-full dark:border-gray-700/80 text-xl font-semibold text-gray-900 dark:text-white transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-white/10 cursor-pointer";
+
+interface NavigationButtonItemProps {
+	button: NavigationButton;
+	onAboutClick?: (rect: DOMRect) => void;
+	aboutButtonRef?: React.RefObject<HTMLButtonElement | null>;
+}
+
+const NavigationButtonItem = ({
+	button,
+	onAboutClick,
+	aboutButtonRef,
+}: NavigationButtonItemProps) => {
+	const isAboutButton = button.label === "关于";
+
+	if (isAboutButton && onAboutClick) {
+		return (
+			<button
+				type="button"
+				ref={aboutButtonRef}
+				onClick={(e) => {
+					e.preventDefault();
+					const rect = aboutButtonRef?.current?.getBoundingClientRect();
+					if (rect) onAboutClick(rect);
+				}}
+				className={buttonClassName}
+			>
+				{button.label}
+			</button>
+		);
+	}
+
+	return (
+		<a href={button.href} className={buttonClassName}>
+			{button.label}
+		</a>
+	);
+};
 
 export interface NavigationCardProps {
 	importance?: 0 | 1 | 2 | 3 | 4; // 重要程度：0=整行宽高一半, 1=宽高各占一半, 2=宽一半高1/4, 3=宽1/4高一半, 4=各占1/4
-	buttons: NavigationButton[];
+	buttons?: NavigationButton[];
 }
 
 const getSpanFromImportance = (imp: 0 | 1 | 2 | 3 | 4) => {
@@ -35,6 +86,10 @@ export const NavigationCard = ({
 	const [inputValue, setInputValue] = useState(searchTerm);
 	const [isSearching, setIsSearching] = useState(false);
 	const [isFocused, setIsFocused] = useState(false);
+	const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
+	const [aboutButtonRect, setAboutButtonRect] = useState<DOMRect | null>(null);
+	const aboutButtonRef = useRef<HTMLButtonElement>(null);
+	const navigationButtons = buttons ?? NAVIGATION_BUTTONS;
 
 	useEffect(() => {
 		const timer = setTimeout(() => {
@@ -101,16 +156,24 @@ export const NavigationCard = ({
 				<div className="h-px w-full bg-gray-300 dark:bg-white/20" />
 
 				<div className="flex items-start justify-center gap-4">
-					{buttons.map((btn) => (
-						<a
+					{navigationButtons.map((btn) => (
+						<NavigationButtonItem
 							key={`${btn.label}-${btn.href}`}
-							href={btn.href}
-							className="px-5 py-2 rounded-full dark:border-gray-700/80 text-xl font-semibold text-gray-900 dark:text-white transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-white/10"
-						>
-							{btn.label}
-						</a>
+							button={btn}
+							onAboutClick={(rect) => {
+								setAboutButtonRect(rect);
+								setIsAboutModalOpen(true);
+							}}
+							aboutButtonRef={aboutButtonRef}
+						/>
 					))}
 				</div>
+
+				<AboutModal
+					isOpen={isAboutModalOpen}
+					onClose={() => setIsAboutModalOpen(false)}
+					originRect={aboutButtonRect}
+				/>
 			</div>
 		</div>
 	);

@@ -1,4 +1,5 @@
 import { formatTimestamp } from "../utils/dateFormatter";
+import { useModalStore } from "../store/modalStore";
 import type { MediaItem } from "../utils/articleParser";
 
 export interface RectangleProps {
@@ -18,7 +19,6 @@ export interface RectangleProps {
 	slug?: string; // 文章唯一标识
 	id?: string; // 文章 ID
 	gallery?: MediaItem[]; // 媒体画廊
-	onClick?: (e: React.MouseEvent<HTMLDivElement>) => void; // 点击事件处理器
 	isEmpty?: boolean; // 是否为空卡片
 }
 
@@ -34,12 +34,30 @@ export const Rectangle = ({
 	textColor,
 	descriptionColor,
 	timestamp,
-	content: _content, // 保留用于传递，但组件本身不使用
-	slug: _slug, // 保留用于传递，但组件本身不使用
-	id: _id, // 保留用于传递，但组件本身不使用
-	onClick,
+	author,
+	content,
+	slug,
+	id,
+	gallery,
 	isEmpty,
 }: RectangleProps) => {
+	const openArticle = useModalStore((state) => state.openArticle);
+
+	const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+		if (content) {
+			const target = e.currentTarget;
+			const originRect = target.getBoundingClientRect();
+			openArticle({
+				id: id ?? slug,
+				content,
+				title,
+				author,
+				timestamp,
+				gallery,
+				originRect,
+			});
+		}
+	};
 	// 根据重要程度计算 colSpan 和 rowSpan
 	const getSpanFromImportance = (imp: 0 | 1 | 2 | 3 | 4) => {
 		const spanMap = {
@@ -92,6 +110,8 @@ export const Rectangle = ({
 	const titleColor = textColor || "text-gray-900/70";
 	const descColor = descriptionColor || textColor || "text-gray-800/50";
 
+	const hasClickHandler = !!content;
+
 	return (
 		// biome-ignore lint/a11y/noStaticElementInteractions: I don't know how to fix it
 		<div
@@ -106,16 +126,16 @@ export const Rectangle = ({
 					importance === 0 || importance === 1 || importance === 3
 						? "50vh"
 						: "25vh",
-				...(onClick && { cursor: "pointer" }),
+				...(hasClickHandler && { cursor: "pointer" }),
 			}}
-			onClick={onClick ?? undefined}
-			tabIndex={onClick ? 0 : undefined}
+			onClick={hasClickHandler ? handleClick : undefined}
+			tabIndex={hasClickHandler ? 0 : undefined}
 			onKeyDown={
-				onClick
+				hasClickHandler
 					? (e) => {
 							if (e.key === "Enter" || e.key === " ") {
 								e.preventDefault();
-								onClick(e as unknown as React.MouseEvent<HTMLDivElement>);
+								handleClick(e as unknown as React.MouseEvent<HTMLDivElement>);
 							}
 						}
 					: undefined

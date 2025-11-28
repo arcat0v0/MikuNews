@@ -1,17 +1,10 @@
 import type { RectangleProps } from "../components/Rectangle";
 
-// 扩展接口以支持网站信息卡片标识
-export interface NavigationButton {
-	label: string;
-	href: string;
-}
-
 export interface LayoutItem extends RectangleProps {
 	isWebsiteInfo?: boolean; // 标识是否为网站信息卡片
 	isEmpty?: boolean; // 标识是否为填充用的空卡片
 	isWelcome?: boolean; // 标识是否为欢迎卡片
 	isNavigation?: boolean; // 标识是否为导航卡片
-	navigationButtons?: NavigationButton[]; // 导航按钮列表
 }
 
 /**
@@ -93,10 +86,6 @@ function createNavigationCard(): LayoutItem {
 		color: "#FFFFFF",
 		title: "导航卡片",
 		isNavigation: true,
-		navigationButtons: [
-			{ label: "资讯", href: "/news" },
-			{ label: "美图", href: "/gallery" },
-		],
 	};
 }
 
