@@ -293,6 +293,15 @@ function fillHolesAndAddInfoCard(items: LayoutItem[]) {
 		return null;
 	};
 
+	// 如果没有需要填充的剩余空间（下一个可用位置已经在新行起始列），直接放置占满整行的信息卡片
+	const nextAvailableSlot = tryPlaceItem(createEmptyCard(4));
+	if (!nextAvailableSlot || nextAvailableSlot.c === 0) {
+		const fullWidthInfoCard = createWebsiteInfoCard(0);
+		placeItem(fullWidthInfoCard);
+		items.push(fullWidthInfoCard);
+		return;
+	}
+
 	let safetyCount = 0;
 	while (safetyCount < 20) {
 		// 1. 尝试放 InfoCard(2)
