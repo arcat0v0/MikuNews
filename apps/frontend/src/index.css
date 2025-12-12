@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@font-face {
+	font-family: "PingFangLaiJiangHu";
+	src: url("/fonts/PingFangLaiJiangHuFeiYangTi/PingFangLaiJiangHuFeiYangTi-2.ttf")
+		format("truetype");
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: "DeYiHei";
+	src: url("/fonts/DeYiHei/SmileySans-Oblique-2.ttf")
+		format("truetype");
+	font-weight: normal;
+	font-style: normal;
+}

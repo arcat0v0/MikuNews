@@ -1,0 +1,1 @@
+export { defaultArticlesDir } from "./constants";

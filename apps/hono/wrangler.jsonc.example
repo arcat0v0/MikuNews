@@ -1,0 +1,49 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "mikunews-backend-hono",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-11-28",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"vars": {
+		"TELEGRAM_BOT_TOKEN": "",
+		"TELEGRAM_REVIEWER_ID": "",
+		"TELEGRAM_WEBHOOK_SECRET": "",
+		"ARTICLES_DIR": "",
+		"GITHUB_APP_ID": "",
+		"GITHUB_PRIVATE_KEY": "",
+		"GITHUB_INSTALLATION_ID": "",
+		"GITHUB_OWNER": "",
+		"GITHUB_REPO": "",
+		"GITHUB_BRANCH": "",
+		"GITHUB_ARTICLES_PATH": ""
+	},
+	"kv_namespaces": [
+		{
+			"binding": "",
+			"id": "",
+			"preview_id": ""
+		}
+	]
+	// "r2_buckets": [
+	//   {
+	//     "binding": "MY_BUCKET",
+	//     "bucket_name": "my-bucket"
+	//   }
+	// ],
+	// "d1_databases": [
+	//   {
+	//     "binding": "MY_DB",
+	//     "database_name": "my-database",
+	//     "database_id": ""
+	//   }
+	// ],
+	// "ai": {
+	//   "binding": "AI"
+	// },
+	// "observability": {
+	//   "enabled": true,
+	//   "head_sampling_rate": 1
+	// }
+}

@@ -1,0 +1,22 @@
+# Wrangler development environment variables
+# Copy this file to .dev.vars and fill in your actual values
+# .dev.vars is gitignored and will be loaded automatically by wrangler dev
+
+TELEGRAM_BOT_TOKEN=your_bot_token_here
+TELEGRAM_REVIEWER_ID=your_telegram_user_id_here
+TELEGRAM_WEBHOOK_SECRET=optional_webhook_secret
+ARTICLES_DIR=../../articles
+
+# GitHub App Configuration
+GITHUB_APP_ID=your_app_id
+# Note: Since .dev.vars handles multiline strings poorly, you might need to base64 encode the private key or ensure it is handled correctly in code.
+# For local dev, you can also paste the PEM content with \n replaced by actual newlines if the parser supports it, but usually single line is safer.
+GITHUB_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----
+...
+-----END RSA PRIVATE KEY-----"
+GITHUB_INSTALLATION_ID=your_installation_id
+
+GITHUB_OWNER=your_github_username_or_org
+GITHUB_REPO=your_github_repo_name
+GITHUB_BRANCH=main
+GITHUB_ARTICLES_PATH=articles

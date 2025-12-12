@@ -1,0 +1,23 @@
+{
+  "name": "MikuNews",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "pnpm --dir apps/frontend run dev",
+    "build": "pnpm --dir apps/frontend run build",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "hono-dev": "pnpm --dir apps/hono run dev",
+    "hono-deploy": "pnpm --dir apps/hono run deploy",
+    "crawl": "uv run apps/crawler/crawl.py",
+    "hono-crawl-test": "pnpm run hono-dev & H_PID=$! && sleep 3 && pnpm run crawl; kill $H_PID"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.23.0",
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "~5.9.3"
+  }
+}
