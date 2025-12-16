@@ -58,7 +58,11 @@ const WebsiteInfoCardComponent = ({ importance = 4 }: WebsiteInfoCardProps) => {
 
 					{/* 备案号 */}
 					<p className="text-[10px] text-gray-800/60 dark:text-white/60">
-						ICP备案号：京ICP备20250000号
+						ICP备案号：蜀ICP备2022030146号-3
+					</p>
+					{/* 备案号 */}
+					<p className="text-[10px] text-gray-800/60 dark:text-white/60">
+						公安备案号：绝赞备案中...
 					</p>
 
 					{/* 在较大的卡片中显示更多信息 */}
