@@ -1,5 +1,11 @@
 import { motion } from "framer-motion";
-import { Mail, Github, Heart, Sparkles } from "lucide-react";
+import {
+	Mail,
+	Github,
+	Heart,
+	Sparkles,
+	MessageCircleHeart,
+} from "lucide-react";
 import { ModalContainer } from "./ModalContainer";
 
 export interface AboutModalProps {
@@ -8,7 +14,11 @@ export interface AboutModalProps {
 	originRect: DOMRect | null;
 }
 
-export const AboutModal = ({ isOpen, onClose, originRect }: AboutModalProps) => {
+export const AboutModal = ({
+	isOpen,
+	onClose,
+	originRect,
+}: AboutModalProps) => {
 	return (
 		<ModalContainer isOpen={isOpen} onClose={onClose} originRect={originRect}>
 			<div className="bg-white dark:bg-[rgb(18,18,18)] rounded-2xl shadow-2xl min-h-full p-12">
@@ -30,14 +40,6 @@ export const AboutModal = ({ isOpen, onClose, originRect }: AboutModalProps) => 
 					>
 						关于 MikuNews
 					</motion.h1>
-					<motion.p
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ delay: 0.4 }}
-						className="text-lg text-gray-600 dark:text-gray-400"
-					>
-						一个现代化的资讯聚合平台
-					</motion.p>
 				</div>
 
 				{/* 分隔线 */}
@@ -50,53 +52,17 @@ export const AboutModal = ({ isOpen, onClose, originRect }: AboutModalProps) => 
 					transition={{ delay: 0.5 }}
 					className="mb-12"
 				>
-					<h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-						<Heart className="w-6 h-6 text-red-500" />
-						关于我们
-					</h2>
 					<p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
-						MikuNews 致力于为用户提供最新、最全面的资讯内容。我们采用现代化的设计理念，
-						结合智能布局算法，为您呈现独特的阅读体验。
+						MikuNews
+						这里是初音的小世界，只提供一些与初音未来有关的演唱会、新歌、联动等信息，或者是一些初音未来的精美壁纸、图片。
+					</p>
+					<p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+						MikuNews是一个使用React Router
+						v7打造的比较花哨的网页，使用了vite，外加使用Markdown来纂写文章内容。
 					</p>
 					<p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-						无论是科技动态、文化资讯还是精美图片，我们都精心筛选，
-						只为给您带来最优质的内容。
+						如果你有任何建议或想法，欢迎通过以下方式联系我们！
 					</p>
-				</motion.section>
-
-				{/* 特色功能 */}
-				<motion.section
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.6 }}
-					className="mb-12"
-				>
-					<h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-6">
-						特色功能
-					</h2>
-					<div className="grid grid-cols-2 gap-4">
-						{[
-							{ title: "智能布局", desc: "自适应瀑布流布局" },
-							{ title: "深色模式", desc: "护眼的夜间主题" },
-							{ title: "实时搜索", desc: "快速找到感兴趣的内容" },
-							{ title: "流畅动画", desc: "丝滑的交互体验" },
-						].map((feature, index) => (
-							<motion.div
-								key={feature.title}
-								initial={{ opacity: 0, scale: 0.9 }}
-								animate={{ opacity: 1, scale: 1 }}
-								transition={{ delay: 0.7 + index * 0.1 }}
-								className="p-4 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800"
-							>
-								<h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-									{feature.title}
-								</h3>
-								<p className="text-sm text-gray-600 dark:text-gray-400">
-									{feature.desc}
-								</p>
-							</motion.div>
-						))}
-					</div>
 				</motion.section>
 
 				{/* 联系我们 */}
@@ -111,23 +77,23 @@ export const AboutModal = ({ isOpen, onClose, originRect }: AboutModalProps) => 
 					</h2>
 					<div className="space-y-4">
 						<a
-							href="mailto:contact@mikunews.com"
+							href="https://qm.qq.com/q/rj5UrwQsDu"
 							className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 hover:border-cyan-400 dark:hover:border-cyan-500 transition-colors group"
 						>
-							<div className="w-10 h-10 rounded-full bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center group-hover:bg-cyan-200 dark:group-hover:bg-cyan-900/50 transition-colors">
-								<Mail className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+							<div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-900/50 transition-colors">
+								<MessageCircleHeart className="w-5 h-5 text-green-600 dark:text-green-400" />
 							</div>
 							<div>
 								<div className="font-medium text-gray-900 dark:text-white">
-									邮箱
+									QQ 群：CYの聊天吹水群
 								</div>
 								<div className="text-sm text-gray-600 dark:text-gray-400">
-									contact@mikunews.com
+									314033009
 								</div>
 							</div>
 						</a>
 						<a
-							href="https://github.com/mikunews"
+							href="https://github.com/arcat0v0/MikuNews"
 							target="_blank"
 							rel="noopener noreferrer"
 							className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 hover:border-gray-400 dark:hover:border-gray-600 transition-colors group"
@@ -140,7 +106,7 @@ export const AboutModal = ({ isOpen, onClose, originRect }: AboutModalProps) => 
 									GitHub
 								</div>
 								<div className="text-sm text-gray-600 dark:text-gray-400">
-									github.com/mikunews
+									github.com/arcat0v0/MikuNews
 								</div>
 							</div>
 						</a>
@@ -156,8 +122,8 @@ export const AboutModal = ({ isOpen, onClose, originRect }: AboutModalProps) => 
 				>
 					<p className="text-sm text-gray-500 dark:text-gray-500">
 						© 2025 MikuNews. Made with{" "}
-						<Heart className="inline w-4 h-4 text-red-500" /> by the
-						MikuNews Team
+						<Heart className="inline w-4 h-4 text-red-500" /> by the MikuNews
+						Team
 					</p>
 				</motion.div>
 			</div>
