@@ -15,7 +15,7 @@ export interface MediaGalleryProps {
 
 export const MediaGallery = ({
 	media,
-	className = "",
+	// className = "",
 	useNineGrid = false,
 }: MediaGalleryProps) => {
 	const [currentIndex, setCurrentIndex] = useState(0);
@@ -167,9 +167,9 @@ export const MediaGallery = ({
 	// 判断是否在边界
 	const isAtStart = clampedIndex === 0;
 	const isAtEnd = clampedIndex === displayMedia.length - 1;
-	const isShowingCollage = Boolean(
-		displayMedia[clampedIndex]?.collageItems?.length,
-	);
+	// const isShowingCollage = Boolean(
+	// 	displayMedia[clampedIndex]?.collageItems?.length,
+	// );
 
 	return (
 		<div
