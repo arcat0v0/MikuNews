@@ -9,26 +9,8 @@ const welcomeTexts = [
 	"感谢你的支持！",
 ];
 
-const fontFamily = "ZiHunBianTaoTi";
-const fontUrl = "/fonts/ZiHunBianTaoTi/ZiHunBianTaoTi-2.ttf";
-
 const WelcomeCardComponent = () => {
 	const isDarkMode = useThemeStore((state) => state.isDarkMode);
-
-	// 动态加载自定义字体
-	const style = document.createElement("style");
-	style.textContent = `
-		@font-face {
-			font-family: '${fontFamily}';
-			src: url('${fontUrl}') format('truetype');
-			font-weight: normal;
-			font-style: normal;
-		}
-	`;
-	if (!document.head.querySelector(`style[data-font="${fontFamily}"]`)) {
-		style.setAttribute("data-font", fontFamily);
-		document.head.appendChild(style);
-	}
 
 	return (
 		<div

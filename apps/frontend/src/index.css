@@ -2,7 +2,7 @@
 
 @font-face {
 	font-family: "PingFangLaiJiangHu";
-	src: url("/fonts/PingFangLaiJiangHuFeiYangTi/PingFangLaiJiangHuFeiYangTi-2.ttf")
+	src: url("https://assets.miku.news/fonts/PingFangLaiJiangHuFeiYangTi/PingFangLaiJiangHuFeiYangTi-2.ttf")
 		format("truetype");
 	font-weight: normal;
 	font-style: normal;
@@ -10,7 +10,15 @@
 
 @font-face {
 	font-family: "DeYiHei";
-	src: url("/fonts/DeYiHei/SmileySans-Oblique-2.ttf")
+	src: url("https://assets.miku.news/fonts/DeYiHei/SmileySans-Oblique-2.ttf")
+		format("truetype");
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: "ZiHunBianTaoTi";
+	src: url("https://assets.miku.news/fonts/ZiHunBianTaoTi/ZiHunBianTaoTi-2.ttf")
 		format("truetype");
 	font-weight: normal;
 	font-style: normal;
