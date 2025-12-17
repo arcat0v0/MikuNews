@@ -57,17 +57,17 @@ const WebsiteInfoCardComponent = ({ importance = 4 }: WebsiteInfoCardProps) => {
 					</p>
 
 					{/* 备案号 */}
-					{[
-						"ICP备案号：蜀ICP备2022030146号-3",
-						"公安备案号：绝赞备案中...",
-					].map((record) => (
-						<p
-							key={record}
-							className="text-[10px] text-gray-800/60 dark:text-white/60"
-						>
-							{record}
-						</p>
-					))}
+					<p className="text-[10px] text-gray-800/60 dark:text-white/60">
+						ICP备案号：蜀ICP备2022030146号-3
+					</p>
+					<a
+						href="https://beian.mps.gov.cn/#/query/webSearch?code=51012402001568"
+						rel="noreferrer"
+						target="_blank"
+						className="text-[10px] text-gray-800/60 dark:text-white/60 block"
+					>
+						川公网安备51012402001568号
+					</a>
 
 					{/* 在较大的卡片中显示更多信息 */}
 					{(importance === 0 || importance === 1 || importance === 3) && (

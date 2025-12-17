@@ -1,11 +1,5 @@
 import { motion } from "framer-motion";
-import {
-	Mail,
-	Github,
-	Heart,
-	Sparkles,
-	MessageCircleHeart,
-} from "lucide-react";
+import { Github, Heart, MessageCircleHeart } from "lucide-react";
 import { ModalContainer } from "./ModalContainer";
 
 export interface AboutModalProps {
@@ -28,9 +22,9 @@ export const AboutModal = ({
 						initial={{ scale: 0 }}
 						animate={{ scale: 1 }}
 						transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-						className="inline-flex items-center justify-center w-20 h-20 mb-6 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 dark:from-cyan-500 dark:to-blue-600"
+						className="inline-flex items-center justify-center w-20 h-20 mb-6"
 					>
-						<Sparkles className="w-10 h-10 text-white" />
+						<img src="/MikuNews.svg" alt="MikuNews Logo" className="w-20 h-20 rounded-2xl" />
 					</motion.div>
 					<motion.h1
 						initial={{ opacity: 0, y: 20 }}
