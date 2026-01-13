@@ -3,6 +3,12 @@ import { useParams, useNavigate, useLocation } from "react-router";
 import { useModalStore } from "../store/modalStore";
 import { useArticleLayoutStore } from "../store/articleLayoutStore";
 import { ArticleModal } from "./ArticleModal";
+import {
+	applySeo,
+	buildArticleSeo,
+	buildWebsiteSeo,
+	getDefaultDescription,
+} from "../utils/seo";
 
 export const ModalProvider = () => {
 	const { articleId } = useParams<{ articleId?: string }>();
@@ -131,6 +137,57 @@ export const ModalProvider = () => {
 		rawRectangles,
 		navigate,
 		attemptOpenArticleById,
+	]);
+
+	useEffect(() => {
+		const baseUrl = window.location.origin;
+		const resolvedId = selectedArticle?.id ?? articleId;
+		const matchedArticle = resolvedId
+			? rawRectangles.find(
+					(item) => item.id === resolvedId || item.slug === resolvedId,
+				)
+			: null;
+
+		if (location.pathname === "/about") {
+			const aboutUrl = `${baseUrl}${location.pathname}`;
+			applySeo(
+				buildWebsiteSeo(aboutUrl, {
+					title: "关于 - MikuNews",
+					description:
+						"关于 MikuNews 的项目介绍、联系信息与社区入口。",
+				}),
+			);
+			return;
+		}
+
+		if (matchedArticle || selectedArticle) {
+			const articleUrl = `${baseUrl}/${resolvedId ?? ""}`.replace(/\\/$/, "");
+			const seoArticle = {
+				id: matchedArticle?.id ?? resolvedId,
+				slug: matchedArticle?.slug,
+				title: selectedArticle?.title ?? matchedArticle?.title,
+				description: matchedArticle?.description,
+				content: selectedArticle?.content ?? matchedArticle?.content,
+				author: selectedArticle?.author ?? matchedArticle?.author,
+				timestamp: selectedArticle?.timestamp ?? matchedArticle?.timestamp,
+				backgroundImage: matchedArticle?.backgroundImage,
+				gallery: selectedArticle?.gallery ?? matchedArticle?.gallery,
+			};
+			applySeo(buildArticleSeo(articleUrl, seoArticle));
+			return;
+		}
+
+		const homeUrl = `${baseUrl}${location.pathname === "/" ? "" : location.pathname}`;
+		applySeo(
+			buildWebsiteSeo(homeUrl, {
+				description: getDefaultDescription(),
+			}),
+		);
+	}, [
+		articleId,
+		location.pathname,
+		rawRectangles,
+		selectedArticle,
 	]);
 
 	// 当模态框打开时，更新 URL
